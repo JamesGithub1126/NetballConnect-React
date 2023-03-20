@@ -1,0 +1,8 @@
+node_modules
+build
+.idea
+.env*
+wsa_keys*
+.DS_Store
+.vscode
+e2e/.env*

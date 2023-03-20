@@ -1,0 +1,52 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 14
+      python: 3.8
+    commands:
+      - npm install --silent --no-progress -g npm
+  pre_build:
+    on-failure: ABORT
+    commands:
+      - cd e2e 
+      - npm install --silent --no-progress
+      - CREDENTIALS=$(aws sts assume-role --role-arn ${CROSS_ACC_ROLE_ARN} --role-session-name codebuild-secrets --duration-seconds 900)
+      - export AWS_ACCESS_KEY_ID="$(echo ${CREDENTIALS} | jq -r '.Credentials.AccessKeyId')"
+      - export AWS_SECRET_ACCESS_KEY="$(echo ${CREDENTIALS} | jq -r '.Credentials.SecretAccessKey')"
+      - export AWS_SESSION_TOKEN="$(echo ${CREDENTIALS} | jq -r '.Credentials.SessionToken')"
+      #- SM_STORE_ARN=${SECRETS_ARN} ../generate-env.sh 
+      - aws secretsmanager get-secret-value --secret-id $SECRETS_ARN --query SecretString --output text | jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' > .env
+      - sed -i 's|DEP_ENV=local|DEP_ENV=cf|g' .env
+      - export `cat .env | grep WSA_TEST_ARTIFACT_BUCKET`
+      - unset -v AWS_ACCESS_KEY_ID
+      - unset -v AWS_SECRET_ACCESS_KEY
+      - unset -v AWS_SESSION_TOKEN
+  build:
+    on-failure: ABORT
+    commands:
+      # Never fail the e2e execution (see note below)
+      - npm run e2e || true
+      #
+      # If no report is produced we probably have run into another
+      # type of execution or code error. So let the build fail.
+      #
+      # Otherwise we assume tests are finished with or without 
+      # errors and a report will provide results as such.
+      #
+      - if [ ! -f ./playwright-report/index.html ]; then echo "!!! e2e execution or code error !!!"; $(exit 1); fi
+  post_build:
+    on-failure: ABORT
+    commands:
+      - cd ./playwright-report 
+      - export RESULT_DATE=`date "+%Y%m%dT%H%M%SZ"`
+      - export ZIP_FILENAME=$RESULT_DATE".zip"
+      - export ZIP_LITE_FILENAME=$RESULT_DATE"-lite.zip"
+      #- export REPO_NAME=`basename $(git remote get-url origin)`
+      - export REPO_NAME=wsa-comp-admin
+      - zip -r $ZIP_FILENAME *
+      - zip -r $ZIP_LITE_FILENAME * -i '*.htm*' '*.png'
+      - aws s3 cp --sse aws:kms --sse-kms-key-id ${S3_KMS_ARN} $ZIP_FILENAME s3://$WSA_TEST_ARTIFACT_BUCKET/test-results/$REPO_NAME/$ZIP_FILENAME
+      - ../../iac/scripts/mail_file_using_ses $ZIP_LITE_FILENAME $REPO_NAME
+

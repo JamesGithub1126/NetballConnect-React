@@ -1,0 +1,70 @@
+{
+    "extends": [
+        "react-app",
+        "airbnb"
+    ],
+    "parser": "babel-eslint",
+    "env": {
+        "browser": true,
+        "jasmine": true
+    },
+    "settings": {
+        "import/resolver": {
+            "node": {
+                "paths": [
+                    "src"
+                ]
+            }
+        }
+    },
+    "rules": {
+        "linebreak-style": [0, "error", "windows"],
+        "eqeqeq": 0,
+        "semi": 0,
+        "camelcase": "warn",
+        "consistent-return": 0,
+        "indent": [
+            "warn",
+            2,
+            {
+                "SwitchCase": 1
+            }
+        ],
+        "jsx-a11y/anchor-has-content": 0,
+        "jsx-a11y/anchor-is-valid": 0,
+        "jsx-a11y/click-events-have-key-events": 0,
+        "jsx-a11y/label-has-associated-control": 0,
+        "jsx-a11y/no-autofocus": 0,
+        "jsx-a11y/no-noninteractive-element-interactions": 0,
+        "jsx-a11y/no-static-element-interactions": 0,
+        "max-len": [
+            "error",
+            {
+                "code": 150
+            }
+        ],
+        "no-case-declarations": 0,
+        "no-nested-ternary": 0,
+        "no-underscore-dangle": 0,
+        "quotes": 0,
+        "react/destructuring-assignment": 0,
+        "react/forbid-prop-types": 0,
+        "import/prefer-default-export": 0,
+        "react/jsx-filename-extension": [
+            1,
+            {
+                "extensions": [
+                    ".js",
+                    ".jsx",
+                    ".tsx"
+                ]
+            }
+        ],
+        "react/jsx-indent": 0,
+        "react/jsx-indent-props": 0,
+        "react/jsx-props-no-spreading": 0,
+        "react/no-array-index-key": 1,
+        "react/no-unused-state": "warn",
+        "react/prop-types": 0
+    }
+}

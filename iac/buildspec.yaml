@@ -1,0 +1,36 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 14
+      python: 3.8
+    commands:
+      - npm install --silent --no-progress -g npm
+  pre_build:
+    on-failure: ABORT
+    commands:
+      - npm install --silent --no-progress
+      - CREDENTIALS=$(aws sts assume-role --role-arn ${CROSS_ACC_ROLE_ARN} --role-session-name codebuild-secrets --duration-seconds 900)
+      - export AWS_ACCESS_KEY_ID="$(echo ${CREDENTIALS} | jq -r '.Credentials.AccessKeyId')"
+      - export AWS_SECRET_ACCESS_KEY="$(echo ${CREDENTIALS} | jq -r '.Credentials.SecretAccessKey')"
+      - export AWS_SESSION_TOKEN="$(echo ${CREDENTIALS} | jq -r '.Credentials.SessionToken')"
+      - SM_STORE_ARN=${SECRETS_ARN} ./generate-env.sh 
+      - sed -i 's|DEP_ENV=local|DEP_ENV=cf|g' .env
+      # Obtain flavour from SM
+      - export APP_FLAVOUR="$(aws secretsmanager get-secret-value --secret-id ${SECRETS_ARN} --query 'SecretString' --output text | jq -r '.APP_FLAVOUR')"
+      - unset -v AWS_ACCESS_KEY_ID
+      - unset -v AWS_SECRET_ACCESS_KEY
+      - unset -v AWS_SESSION_TOKEN
+  build:
+    on-failure: ABORT
+    commands:
+      - ./deployment_flavours/set_flavour
+      - npm run build
+  post_build:
+    on-failure: ABORT
+    commands:
+      - export AWS_MAX_ATTEMPTS=8
+      - aws s3 sync --delete ./build s3://$ADMIN_DEPLOYMENT_BUCKET
+      - aws cloudfront create-invalidation --distribution-id $ADMIN_CLOUDFRONT_DISTIBUTION_ID --paths "/*"
+      

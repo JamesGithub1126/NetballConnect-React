@@ -1,0 +1,21 @@
+.integration-body .ant-card-head-title {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.card-info {
+  margin-bottom: 20px;
+  padding: 0 0 20px 0;
+}
+.card-info .info-label {
+  font-weight: 600;
+  font-size: 13px;
+}
+.card-info .info-value {
+  margin-top: 5px;
+}
+
+.card-info-line {
+  margin-bottom: 0 !important;
+  padding: 0 !important;
+}

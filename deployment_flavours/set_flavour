@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+# Sync missing .env KEYS into secret manager
+# 
+set -euo pipefail
+
+# Determine what flavour is set 
+if [ -z "${APP_FLAVOUR}" ] 
+  then
+    echo 'Flavour not set! Using default flavour.'
+    exit 255
+fi
+echo "Attempting to use flavour: "${APP_FLAVOUR}
+
+# Apply changes based on choosen flavour
+if [ ! -d "./deployment_flavours/${APP_FLAVOUR}" ]
+  then
+    echo "Flavour ${APP_FLAVOUR} not defined! Using default flavour."
+    exit 0
+  else  
+    echo "Setting flavour: "${APP_FLAVOUR}
+    cp -rf ./deployment_flavours/${APP_FLAVOUR}/* .
+fi
+

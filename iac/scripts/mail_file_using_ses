@@ -1,0 +1,31 @@
+#!/bin/bash
+#
+# Sent mail with file attachment using SES API 
+#
+# Please note that the expectation is that the file,
+# to be attached, is available in local folder.
+#
+
+set -eo pipefail
+if [ -z $1 ] ; then echo "No filename provided (as first parameter), aborting!" ; exit 255; fi
+if [ -z $2 ] ; then echo "No repository name provided (as second parameter), aborting!" ; exit 255; fi
+set -u
+
+AWS_REGION=ap-southeast-2
+SENDER=no-reply@squadi.com
+RECIPIENT=wsacollaboration@gmail.com,apurva.kolse@spurqlabs.com
+SUBJECT="Test results [$1 - $2]"
+BODY="Hi, find attached test results for repo '$2'. The attached zip file is a 'lite' version only, containing limited test result resources. Go to respective S3 bucket to download full zip file. THIS IS AN AUTOMATED MESSAGE - PLEASE DON'T REPLY !"
+ATTACHMENT_TYPE="application/zip"
+ATTACHMENT_FILE_NAME="$1"
+ATTACHMENT_FILE_TO_READ_FROM_DISK="./$1"
+
+# Create message
+echo '{"Data": "From: Playwright Test Runner<'${SENDER}'>\nTo:'${RECIPIENT}'\nSubject:'${SUBJECT}'\nMIME-Version: 1.0\nContent-type: Multipart/Mixed; boundary=\"NextPart\"\n\n--NextPart\nContent-Type: text/plain\n\n'${BODY}'\n\n--NextPart\nContent-Type:'${ATTACHMENT_TYPE}';\nContent-Transfer-Encoding: base64;\nContent-Disposition: attachment; filename=\"'${ATTACHMENT_FILE_NAME}'\"\n\n'$(base64 ${ATTACHMENT_FILE_TO_READ_FROM_DISK})'\n\n--NextPart--"}' > message.json
+
+echo "Sending file $1 to ${RECIPIENT}..."
+aws ses send-raw-email \
+  --region ${AWS_REGION} \
+  --cli-binary-format raw-in-base64-out \
+  --raw-message file://message.json
+

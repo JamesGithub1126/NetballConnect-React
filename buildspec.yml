@@ -1,0 +1,27 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+    # force npm@8.19.2 to support node v10/v12
+      - npm install --silent --no-progress -g npm@8.19.2
+  pre_build:
+    commands:
+      - npm install --silent --no-progress
+      - echo Getting .env params...
+      - CREDENTIALS=$(aws sts assume-role --role-arn ${SM_STORE_ROLE_ARN} --role-session-name codebuild-secrets --duration-seconds 900)
+      - export AWS_ACCESS_KEY_ID="$(echo ${CREDENTIALS} | jq -r '.Credentials.AccessKeyId')"
+      - export AWS_SECRET_ACCESS_KEY="$(echo ${CREDENTIALS} | jq -r '.Credentials.SecretAccessKey')"
+      - export AWS_SESSION_TOKEN="$(echo ${CREDENTIALS} | jq -r '.Credentials.SessionToken')"
+      - SM_STORE=${SM_STORE_REFERENCE} ./generate-env.sh 
+      - sed -i 's|DEP_ENV=local|DEP_ENV=eks|g' .env
+      - unset -v AWS_ACCESS_KEY_ID
+      - unset -v AWS_SECRET_ACCESS_KEY
+      - unset -v AWS_SESSION_TOKEN
+  build:
+    commands:
+      - npm run build
+  post_build:
+    commands:
+      - aws s3 sync --delete ./build $DEPLOYMENT_BUCKET
+      - aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTIBUTION_ID --paths "/*"

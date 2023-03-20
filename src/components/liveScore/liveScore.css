@@ -1,0 +1,579 @@
+@import '../../themes/colorVariables.css';
+
+.live-score-player-profile-layout.ant-layout {
+  background-color: var(--app-white);
+}
+.ant-row.ant-form-item.formMargin {
+  padding: 10px 0;
+}
+.live-score-player-profile-layout .ant-layout-footer {
+  background-color: var(--app-white);
+}
+
+.live-score-player-profile-content {
+  padding: 0 3%;
+}
+
+.video_Message {
+  color: var(--app-color);
+  font-weight: 500;
+  font-family: inter-medium, sans-serif;
+  font-size: 11px;
+  padding-top: 5px;
+}
+
+.heading-text {
+  display: flex;
+  justify-content: center;
+  font-size: 22px;
+  color: var(--app-1b1b34);
+  font-weight: 500;
+  font-family: inter-medium, sans-serif;
+}
+
+.live-score-heading-text-view {
+  /* display: flex; */
+  padding-top: 3%;
+}
+
+.profile-img-view-style {
+  display: flex;
+  flex-direction: column;
+  padding-top: 15px;
+}
+
+.user-image {
+  border-radius: 40px;
+}
+
+.live-score-title-text {
+  display: flex;
+  color: var(--app-1b1b34);
+  font-weight: 600;
+  font-family: inter-bold, sans-serif;
+  padding-left: 10px;
+}
+
+.desc-text-style {
+  display: flex;
+  align-content: center;
+  text-align: left;
+  font-size: 13px;
+  color: var(--app-4c4c6d);
+  font-weight: 500;
+  font-family: inter-medium, sans-serif;
+  padding-top: 10px;
+}
+
+.live-score-title-icon-view {
+  display: flex;
+  flex-direction: row;
+}
+
+.live-score-icon-view {
+  display: flex;
+  align-items: center;
+}
+
+.live-score-side-desc-view {
+  padding-top: 10px;
+  padding-bottom: 15px;
+  border-bottom: 0.5px solid var(--app-e1e1f5);
+}
+
+.primary-reg-live-score {
+  font-weight: 600;
+  font-family: inter-semi-bold, sans-serif;
+  font-size: 13px;
+  /* width: 123px; */
+  color: var(--app-f7fafc);
+  height: 32.5px;
+  border-radius: 7px;
+  background-image: var(--app-gradient-right);
+  justify-content: center;
+  display: flex;
+  background-color: var(--app-ff6c4f);
+  border-color: var(--app-ff6c4f);
+  margin-top: 10px;
+}
+
+.live-score-edit {
+  background-color: var(--app-e0e1e3) !important;
+  border-color: var(--app-e0e1e3) !important;
+  color: var(--app-4c4c6d) !important;
+  font-weight: 500;
+  font-family: inter-medium, sans-serif;
+  width: 89px;
+  margin-right: 20px;
+}
+
+.live-score-profile-user-name {
+  display: flex;
+  /* align-content: center;
+  justify-content: center;
+  text-align: center; */
+  font-size: 22px;
+  color: var(--app-1b1b34);
+  font-weight: 500;
+  font-family: inter-medium, sans-serif;
+  margin-top: 10px;
+}
+
+.match-details-team-name {
+  cursor: pointer;
+}
+
+.table-cell-select .ant-select-selection {
+  border: 1px solid var(--app-d9d9d9) !important;
+  min-height: unset !important;
+}
+
+.match-score-detail {
+  border-bottom: 0.5px solid var(--app-e1e1f5);
+  padding: 3px 0 10px 0;
+}
+
+.match-details-rl-padding {
+  padding-left: 1.5%;
+  padding-right: 1.5%;
+}
+
+.export-image {
+  height: 12px;
+  width: 12px;
+  margin-right: 5px;
+  /* margin-bottom: 3px */
+}
+
+.banner-image {
+  width: 400px;
+  margin-right: 5px;
+  /* height: 300px; */
+}
+
+.profile-image-view {
+  /* background-color: antiquewhite; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  /* margin-right: 50px */
+}
+
+.side-bar-profile-data {
+  font-size: 15px;
+}
+.text-heading-medium {
+  font-weight: bold;
+  font-size: 15px;
+  display: flex;
+  margin-bottom: 10px;
+}
+.text-heading-large {
+  font-weight: bold;
+  font-size: 17px;
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.livescore-editor-news {
+  border-color: var(--app-color);
+  border-right-width: 1px !important;
+}
+
+.rdw-editor-main {
+  min-height: 120px;
+  /* max-height: 240px; */
+}
+
+.newsDetailEditor {
+  min-height: 120px;
+  max-height: 240px;
+}
+
+.livescore-editor-news:hover {
+  border-color: var(--app-color);
+  border-right-width: 1px !important;
+  -webkit-box-shadow: 0 0 0 1px var(--app-color);
+  box-shadow: 0 0 0 1px var(--app-color);
+}
+
+.livescore-editor-news:focus-within {
+  border-color: var(--app-color);
+  border-right-width: 1px !important;
+  -webkit-box-shadow: 0 0 0 1.5px var(--app-color);
+  box-shadow: 0 0 0 1.5px var(--app-color);
+  border-radius: 2px;
+}
+
+.ant-select-auto-complete.ant-select .ant-input {
+  height: 56px;
+  line-height: 1.5;
+  background: transparent;
+  border-width: 1px;
+}
+
+.ant-select-auto-complete.ant-select .ant-input:hover {
+  border-color: var(--app-color);
+  box-shadow: 0 0 0 0px var(--app-color);
+}
+
+.ant-select-auto-complete.ant-select .ant-input:focus,
+.ant-select-auto-complete.ant-select .ant-input:hover {
+  border-color: var(--app-color);
+  border-right-width: 1px !important;
+}
+
+.slct-in-add-manager-livescore .ant-form-item-control {
+  line-height: 15px;
+}
+
+.table-live-score-table-fixture-style {
+  /* background-color: aqua; */
+  height: 55px;
+  display: flex;
+  align-self: center;
+  align-items: center;
+}
+
+.table-live-score-table-fixture-style-main {
+  height: 110px;
+  /* background-color: red */
+}
+
+.livescore-seasonfixture-table .ant-table-thead > tr > th {
+  font-weight: 500;
+  font-family: inter-medium, sans-serif;
+  font-size: 13px;
+  overflow-wrap: break-word;
+  color: var(--app-9b9bad);
+  /* padding-left: 21px; */
+  height: 48px;
+  background-color: var(--app-white);
+}
+
+.livescore-seasonfixture-table .ant-table-tbody > tr > td {
+  overflow-wrap: break-word;
+  color: var(--app-4c4c6d);
+  font-family: inter, sans-serif;
+  height: 64px;
+  background-color: var(--app-white);
+  padding: 0 !important;
+}
+
+.livescore-seasonfixture-table
+  .ant-table-thead
+  > tr.ant-table-row-hover:not(.ant-table-expanded-row):not(.ant-table-row-selected)
+  > td,
+.livescore-seasonfixture-table
+  .ant-table-tbody
+  > tr.ant-table-row-hover:not(.ant-table-expanded-row):not(.ant-table-row-selected)
+  > td,
+.livescore-seasonfixture-table
+  .ant-table-thead
+  > tr:hover:not(.ant-table-expanded-row):not(.ant-table-row-selected)
+  > td,
+.livescore-seasonfixture-table
+  .ant-table-tbody
+  > tr:hover:not(.ant-table-expanded-row):not(.ant-table-row-selected)
+  > td {
+  background: transparent;
+}
+
+.inner-table-row-heading-text {
+  font-weight: 500;
+  font-family: inter-medium, sans-serif;
+  font-size: 18px;
+  overflow-wrap: break-word;
+  color: var(--app-color);
+}
+
+/* .ant-checkbox-wrapper {
+
+  color:'#1b1b34';
+  font-weight: 200
+} */
+.tool-tip-display {
+  display: table !important;
+}
+
+.Content_Content__1CE8z * {
+  max-width: 100%;
+  white-space: pre-line;
+}
+
+.progressive-container {
+  /* display: flex; */
+  /* flex-direction: row; */
+  /* background-color: aqua; */
+  white-space: initial;
+  word-wrap: break-word;
+  width: 310px;
+  border-right: solid 1px rgba(27, 27, 52, 0.07);
+}
+
+.Content_Cancel__VinjW {
+  position: absolute;
+  top: 13px;
+  right: 10px;
+  background: none;
+  color: inherit;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: inherit;
+  display: flex;
+}
+
+.button-spacing-style {
+  margin-bottom: 10px;
+}
+
+.disable-button-style {
+  font-weight: 600;
+  font-family: inter-semi-bold, sans-serif;
+  font-size: 13px;
+  color: var(--app-f7fafc);
+  border-radius: 7px;
+  background-image: var(--app-gradient-right);
+  justify-content: center;
+  display: flex;
+  background-color: var(--app-ff6c4f);
+  border-color: var(--app-ff6c4f);
+  align-items: center;
+}
+
+/* .table-input-box-style {
+    height: 44px;
+    width: 50.5px;
+    font-size: 13px;
+    color: var(--app-1b1b34);
+    font-family: inter, sans-serif;
+    font-weight: normal;
+    margin-left: 5px
+  } */
+
+.table-input-box-style {
+  height: 40px;
+  width: 40px;
+  font-size: 13px;
+  color: var(--app-1b1b34);
+  font-family: inter, sans-serif;
+  font-weight: normal;
+  /* padding:5px; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkbox-green-color-outline .ant-checkbox-group-item {
+  /* float: left; */
+  display: flex;
+  margin-right: 0;
+  align-items: center;
+  text-align: center;
+  padding-top: 16px;
+  font-family: inter, sans-serif;
+  font-weight: normal;
+}
+
+.checkbox-green-color-outline .ant-checkbox-wrapper:hover .ant-checkbox-inner,
+.checkbox-green-color-outline .ant-checkbox:hover .ant-checkbox-inner,
+.checkbox-green-color-outline .ant-checkbox-input:focus + .ant-checkbox-inner {
+  border-color: var(--app-green-bg);
+}
+
+.checkbox-green-color-outline .ant-checkbox-checked::after {
+  border: 1px solid var(--app-green-bg);
+}
+
+.checkbox-green-color-outline .ant-checkbox-checked .ant-checkbox-inner {
+  background-color: var(--app-green-bg);
+  border-color: var(--app-green-bg);
+}
+
+.small-steper-style .ant-input-number {
+  display: flex;
+  padding-top: 0px;
+  /* padding-bottom: 11px; */
+  /* width: 100%; */
+  height: 30px;
+  width: 70px;
+  /* margin-top:7px */
+}
+
+.ladder-points-heading .input-heading {
+  font-size: 14px;
+  font-weight: 500;
+  align-self: center;
+}
+
+.match-sheet-footer-view {
+  padding: 24px 15%;
+}
+
+.sheet-download-link {
+  font-weight: bold;
+  color: var(--app-color);
+}
+
+.sheet-download-link:hover {
+  color: var(--app-color);
+}
+
+.ladder-list-adjustment {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--app-f5222d);
+}
+
+.ant-select-selection--multiple .ant-select-selection__choice__remove {
+  right: 8px;
+}
+
+.ant-select-selection--multiple .ant-select-selection__choice {
+  padding: 0 25px 0 10px;
+}
+
+.reset-ladder-font {
+  padding-top: 10px !important;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  font-size: 16px !important;
+  text-decoration: underline;
+}
+
+.ant-select-selection--multiple .ant-select-selection__choice__remove {
+  right: 8px;
+  top: -1px;
+}
+
+.CornerView .ant-input-lg {
+  border-radius: 4px !important;
+}
+
+.footer-view.bulk {
+  padding: 10px 12.1% 5%;
+}
+
+.space .ant-form-item-control {
+  line-height: 26px;
+}
+
+.ant-input-affix-wrapper .ant-input-prefix {
+  top: 52%;
+  left: 16px;
+}
+
+.livefirst .reg-form-multiple-select .ant-select-selection {
+  height: auto;
+  min-height: 54px;
+  margin-top: 4px;
+}
+
+.livefirst .ant-select-selection {
+  min-height: 55px;
+  margin-top: 8px;
+}
+
+.livefirst .ant-select-selection__placeholder {
+  line-height: 24px;
+}
+
+.livefirst.one .ant-select-selection__placeholder {
+  line-height: 20px;
+}
+
+.ant-calendar-picker-input.ant-input {
+  border-radius: 4px;
+}
+
+.attendance-table .ant-input-number {
+  padding: 0;
+  height: unset;
+}
+
+.livescore-editor-news.col-sm {
+  padding: 0 12px;
+}
+
+.one .ant-form-item-children {
+  line-height: 23px;
+}
+
+.formView.addTeam .has-error .ant-form-explain,
+.formView.addTeam .has-error .ant-form-split {
+  color: #f5222d;
+  margin-top: 2px;
+}
+.text-with-red-color {
+  display: inline-flex;
+  align-content: flex-start;
+  padding-top: 22px;
+  color: red;
+  /* font-weight: 500; */
+  /* font-family: inter-medium, sans-serif; */
+  white-space: nowrap;
+}
+
+.selected-borrow-player {
+  background-color: var(--app-color);
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .live-score-edit-match-buttons {
+    display: flex;
+    width: 10px;
+    /* background-color:seagreen; */
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+@media (max-width: 767px) {
+  .live-score-edit {
+    background-color: var(--app-e0e1e3) !important;
+    border-color: var(--app-e0e1e3) !important;
+    color: var(--app-4c4c6d) !important;
+    font-weight: 500;
+    font-family: inter-medium, sans-serif;
+    width: 89px;
+    margin-right: 0;
+  }
+
+  .live-score-heading-text {
+    font-size: 18px;
+    padding-left: 10px;
+  }
+
+  .live-score-edit-match-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+  }
+
+  .live-form-view-button-header {
+    margin-bottom: 30px;
+  }
+
+  .live-form-view-button-container {
+    /* margin-bottom:30px  */
+    padding-right: 0;
+  }
+
+  .banner-image {
+    width: 200px;
+    margin-right: 5px;
+    /* height: 300px; */
+  }
+
+  .button-spacing-style {
+    margin-bottom: 10px;
+  }
+
+  .add-pos-link {
+    color: var(--app-color);
+  }
+}

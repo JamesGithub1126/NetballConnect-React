@@ -1,0 +1,81 @@
+@import '../../themes/colorVariables.css';
+
+.home-action-bar-container {
+  width: 100%;
+  display: flex;
+  position: relative;
+}
+
+.action-bar-scroll-button {
+  position: absolute;
+  width: 64px;
+  height: 100%;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .action-bar-scroll-icon {
+    background-color: #0002;
+    border-radius: 20px;
+    width: 40px;
+    height: 40px;
+    padding-top: 5px;
+  }
+  
+  .action-bar-scroll-icon:hover {
+    background-color: #0006;
+    color: white;
+  }
+  
+  .action-bar-scroll-icon > span {
+    color:rgba(0, 0, 0, 0.25)
+  }
+  
+  .action-bar-scroll-icon > span:hover {
+    color: white;
+  }
+}
+
+.action-bar-scroll-button.scroll-left {
+  left: -10px;
+}
+
+.action-bar-scroll-button.scroll-right {
+  right: -10px;
+}
+
+.home-action-bar-row {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow: scroll;
+  -ms-overflow-style: none;   /* Internet Explorer 10+ */
+  scrollbar-width: none;      /* Firefox */
+  scroll-behavior: smooth;
+  width: 100%;
+}
+
+.home-action-bar-row::-webkit-scrollbar { 
+  display: none;              /* Safari and Chrome */
+}
+
+.action-card-wrap {
+  min-width: 200px;
+  margin: 20px 0;
+  padding: 0 10px;
+  z-index: 0;
+}
+
+.action-card-extra {
+  min-width: 40px;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+@media screen and (min-width: 1400px) {
+  .action-card-wrap {
+    min-width: 14.28%;
+  }
+}
