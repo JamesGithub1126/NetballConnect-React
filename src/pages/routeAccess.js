@@ -92,6 +92,7 @@ const routeAdminRole = [
   '/matchDayPlayerStatistics',
   '/matchDayCompetitions',
   '/matchDaySuspensions',
+  '/matchDaySuspensionsMyClone',
   '/matchDayBulkChange',
   '/matchDayEditBanners',
   '/matchDayDivisionList',

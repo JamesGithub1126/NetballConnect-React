@@ -1229,6 +1229,13 @@ class InnerHorizontalMenu extends React.Component {
                 </NavLink>
               </Menu.Item>
             )}
+            {process.env.REACT_APP_SUSPENSIONS === 'true' && (
+              <Menu.Item key="3">
+                <NavLink to="/matchDaySuspensionsMyClone">
+                  <span>{AppConstants.suspensionsMyClone}</span>
+                </NavLink>
+              </Menu.Item>
+            )}
           </Menu>
         )}
       </div>

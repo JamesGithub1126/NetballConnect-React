@@ -93,6 +93,7 @@ import LiveScoreBulkChange from 'components/liveScore/liveScoreBulkChange';
 import LiveScoreCoaches from 'components/liveScore/liveScoreCoaches';
 import LiveScoreCompetitions from 'components/liveScore/liveScoreCompetitions';
 import LiveScoreSuspensions from 'components/liveScore/liveScoreSuspensions';
+import LiveScoreSuspensionsMyClone from 'components/liveScore/LiveScoreSuspensionsMyClone';
 import LiveScoreDashboard from 'components/liveScore/liveScoreDashboard';
 import LiveScoreDivisionList from 'components/liveScore/liveScoreDivisionList';
 import LiveScoreDivisionImport from 'components/liveScore/liveScoreDivisionImport';
@@ -1091,6 +1092,15 @@ class Routes extends React.Component {
               : lazyLoad(NotFound)
           }
         />
+
+        <PrivateRoute
+          path="/matchDaySuspensionsMyClone"
+          component={
+            this.haveAccess(userRoleId, '/matchDaySuspensionsMyClone')
+              ? lazyLoad(LiveScoreSuspensionsMyClone)
+              : lazyLoad(NotFound)
+          }
+        />  
 
         <PrivateRoute
           path="/matchDayBulkChange"
