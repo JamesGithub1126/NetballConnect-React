@@ -38,8 +38,8 @@ import { getAffiliateToOrganisationAction } from 'store/actions/userAction/userA
 import {
   setPlayerList,
   toggleModalVisibility,
-} from 'store/actions/moveFAPlayerAction/movePlayerAction';
-import MoveModalComponentWrapper from './moveFromCompetitionFootball/MoveModalComponentWrapper';
+} from 'store/actions/moveFAPlayerAction';
+import MovePlayerModal from './moveFromCompetitionFootball';
 
 const { Content } = Layout;
 const { Option } = Select;
@@ -56,13 +56,12 @@ const regStatus = [
 ];
 
 const HeaderView = React.memo(({ loading, allowMove, onExport }) => {
-  const [visible, setVisible] = useState(false);
   const dispatch = useDispatch();
   const { playersToMove, modalVisible } = useSelector(state => state.MovePlayerState);
+
   const handleOnModalClick = () => {
     dispatch(toggleModalVisibility(!modalVisible));
   };
-  const { organisationUniqueKey } = useOrganisation();
 
   return (
     <div className="comp-player-grades-header-view-design">
@@ -98,10 +97,9 @@ const HeaderView = React.memo(({ loading, allowMove, onExport }) => {
                 Move
               </Button>
             </Popover>
-            <MoveModalComponentWrapper
-              organisationUniqueKey={organisationUniqueKey}
-              visible={modalVisible}
-              handleOnModalClick={handleOnModalClick}
+            <MovePlayerModal
+              selectedPlayers={playersToMove}
+              onChancel={handleOnModalClick}
             />
           </div>
 

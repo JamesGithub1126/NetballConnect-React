@@ -63,6 +63,7 @@ import PlayerCommentModal from '../../customComponents/playerCommentModal';
 import AppUniqueId from '../../themes/appUniqueId';
 import { getCompetitionOrgRegistrationsAction } from '../../store/actions/competitionModuleAction/competitionOrgRegistrationsAction';
 import { isArrayNotEmpty } from '../../util/helpers';
+import { LsCompStatus } from '../../enums/enums';
 
 const { Footer, Content } = Layout;
 const { Option } = Select;
@@ -116,7 +117,6 @@ class CompetitionPlayerGrades extends Component {
 
   componentDidUpdate(prevProps) {
     const competitionList = this.props.appState.own_CompetitionArr;
-    const organisation = getOrganisationData();
     const { allDivisionsData } = this.props.registrationState;
     const { unassignAllLoad } = this.state;
     const fromReplicate = this.props.location.state
@@ -133,10 +133,7 @@ class CompetitionPlayerGrades extends Component {
 
           this.props.getDivisionsListAction(yearId, competitionId);
           this.props.getCompetitionForPlayerGradingAction(id);
-          this.props.getCompetitionOrgRegistrationsAction({
-            competitionUniqueKey: competitionId,
-            organisationUniqueKey: organisation.organisationUniqueKey,
-          });
+          this.getCompetitionOrgRegistrations(competitionId);
           this.setState({
             firstTimeCompId: competitionId,
             competitionStatus: statusRefId,
@@ -231,13 +228,15 @@ class CompetitionPlayerGrades extends Component {
       : null;
     if (!fromReplicate) {
       if (storedCompetitionId && yearId && propsData && compData) {
+        const competitionStatus = selectedComp ? selectedComp.statusRefId : storedCompetitionStatus;
         this.setState({
           yearRefId: JSON.parse(yearId),
           firstTimeCompId: storedCompetitionId,
-          competitionStatus: storedCompetitionStatus,
+          competitionStatus,
           // getDataLoading: true
         });
         if (selectedComp) {
+          this.getCompetitionOrgRegistrations(selectedComp.competitionId);
           this.props.getCompetitionForPlayerGradingAction(selectedComp.id);
         }
         this.props.getDivisionsListAction(yearId, storedCompetitionId);
@@ -273,6 +272,16 @@ class CompetitionPlayerGrades extends Component {
     }
   }
 
+  getCompetitionOrgRegistrations = competitionUniqueKey => {
+    const organisation = getOrganisationData();
+    if (organisation) {
+      this.props.getCompetitionOrgRegistrationsAction({
+        competitionUniqueKey,
+        organisationUniqueKey: organisation.organisationUniqueKey,
+      });
+    }
+  };
+
   getPlayerGrading = (divisionId, showDeletedTeams) => {
     const payload = {
       competitionUniqueKey: this.state.firstTimeCompId,
@@ -291,6 +300,8 @@ class CompetitionPlayerGrades extends Component {
     this.setState({ showDeletedTeams });
     this.getPlayerGrading(this.state.divisionId, showDeletedTeams);
   };
+
+  isHiddenCompetition = () => this.state.competitionStatus == LsCompStatus.Hidden;
 
   headerView = () => {
     const compOrgRegistrationsList =
@@ -316,7 +327,7 @@ class CompetitionPlayerGrades extends Component {
                 <div className="d-flex flex-row align-items-center justify-content-end">
                   <Checkbox
                     className="mr-1"
-                    disabled={this.state.competitionStatus == 1}
+                    disabled={this.isHiddenCompetition()}
                     onClick={() => this.showDeletedTeams()}
                     checked={this.state.showDeletedTeams}
                   />
@@ -325,7 +336,7 @@ class CompetitionPlayerGrades extends Component {
                 </div>
                 <div className="d-flex flex-row align-items-center justify-content-end">
                   <Dropdown
-                    disabled={this.state.competitionStatus == 1}
+                    disabled={this.isHiddenCompetition()}
                     overlay={menu}
                     placement="bottomLeft"
                   >
@@ -353,9 +364,7 @@ class CompetitionPlayerGrades extends Component {
                     >
                       <Button
                         id={AppUniqueId.PlayerGrading_ImportBtn}
-                        disabled={
-                          this.state.competitionStatus == 1 || compOrgRegistrationsListIsEmpty
-                        }
+                        disabled={this.isHiddenCompetition() || compOrgRegistrationsListIsEmpty}
                         className="primary-add-comp-form"
                         type="primary"
                         data-testid={AppUniqueId.PlayerGrading_ImportBtn}
@@ -378,9 +387,7 @@ class CompetitionPlayerGrades extends Component {
                       }}
                     >
                       <Button
-                        disabled={
-                          this.state.competitionStatus == 1 || compOrgRegistrationsListIsEmpty
-                        }
+                        disabled={this.isHiddenCompetition() || compOrgRegistrationsListIsEmpty}
                         className="primary-add-comp-form"
                         type="primary"
                         data-testid={AppUniqueId.PlayerGrading_ImportTeamBtn}
@@ -401,7 +408,7 @@ class CompetitionPlayerGrades extends Component {
                   <div className="d-flex flex-row align-items-center justify-content-end">
                     <Button
                       onClick={() => this.exportPlayerData()}
-                      disabled={this.state.competitionStatus == 1}
+                      disabled={this.isHiddenCompetition()}
                       className="primary-add-comp-form"
                       type="primary"
                       data-testid={AppUniqueId.PlayerGrading_ExportBtn}
@@ -457,6 +464,7 @@ class CompetitionPlayerGrades extends Component {
       competitionStatus: statusRefId,
     });
     this.props.getDivisionsListAction(this.state.yearRefId, competitionId);
+    this.getCompetitionOrgRegistrations(competitionId);
   };
 
   /// //on division change
@@ -660,7 +668,7 @@ class CompetitionPlayerGrades extends Component {
                 <Select
                   id={AppUniqueId.PlayerGradingDivisionName_dpdn}
                   data-testid={AppUniqueId.PlayerGradingDivisionName_dpdn}
-                  disabled={this.state.competitionStatus == 1}
+                  disabled={this.isHiddenCompetition()}
                   style={{ minWidth: 120, marginRight: 65 }}
                   className="year-select reg-filter-select1 ml-2"
                   onChange={divisionId => this.onDivisionChange(divisionId)}
@@ -704,7 +712,7 @@ class CompetitionPlayerGrades extends Component {
     let playerId;
     let linkedPlayers;
     // dropped outside the list
-    if (this.state.competitionStatus != 1) {
+    if (!this.isHiddenCompetition()) {
       if (!destination) {
       } else if (source.droppableId !== destination.droppableId) {
         const teamId =
@@ -827,7 +835,7 @@ class CompetitionPlayerGrades extends Component {
     const assignedData = this.props.partPlayerGradingState.assignedPartPlayerGradingListData;
     const commentList = this.props.partPlayerGradingState.playerCommentList;
     const { commentLoad } = this.props.partPlayerGradingState;
-    const disableStatus = this.state.competitionStatus == 1;
+    const disableStatus = this.isHiddenCompetition();
     const { allowPlayerReplication } = this.state;
     return (
       <div className="d-flex flex-column">
@@ -1398,7 +1406,7 @@ class CompetitionPlayerGrades extends Component {
     const divisionData = this.props.registrationState.allDivisionsData.filter(
       x => x.competitionMembershipProductDivisionId != null,
     );
-    const disableStatus = this.state.competitionStatus == 1;
+    const disableStatus = this.isHiddenCompetition();
     return (
       <div>
         <Droppable isDropDisabled={disableStatus} droppableId="0">
@@ -1697,7 +1705,7 @@ class CompetitionPlayerGrades extends Component {
           <div className="reg-add-save-button">
             <NavLink to="/competitionOpenRegForm">
               <Button
-                disabled={this.state.competitionStatus == 1}
+                disabled={this.isHiddenCompetition()}
                 className="cancelBtnWidth"
                 type="cancel-button"
               >
@@ -1711,7 +1719,7 @@ class CompetitionPlayerGrades extends Component {
             <NavLink to="/competitionPartTeamGradeCalculate">
               <Button
                 id={AppUniqueId.playgrad_Next_bn}
-                disabled={this.state.competitionStatus == 1}
+                disabled={this.isHiddenCompetition()}
                 className="publish-button margin-top-disabled-button"
                 type="primary"
               >

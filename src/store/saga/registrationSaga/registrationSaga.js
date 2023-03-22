@@ -5,10 +5,10 @@ import { message } from 'antd';
 import history from '../../../util/history';
 import AppConstants from '../../../themes/appConstants';
 
-function* failSaga(result) {
+function* failSaga(result, type = ApiConstants.API_REGISTRATION_FAIL) {
   console.log('failSaga', result.result.data.message);
   yield put({
-    type: ApiConstants.API_REGISTRATION_FAIL,
+    type,
     error: result,
     status: result.status,
   });
@@ -21,10 +21,10 @@ function* failSaga(result) {
   }, 800);
 }
 
-function* errorSaga(error) {
+function* errorSaga(error, type = ApiConstants.API_REGISTRATION_ERROR) {
   console.log('errorSaga', error);
   yield put({
-    type: ApiConstants.API_REGISTRATION_ERROR,
+    type,
     error: error,
     status: error.status,
   });
@@ -610,10 +610,10 @@ export function* playerMoveButtonClickedSaga(action) {
       });
       message.success(AppConstants.moveMessageSuccess);
     } else {
-      yield call(failSaga, result);
+      yield call(failSaga, result, ApiConstants.API_MOVE_PLAYER_LOAD_ERROR);
     }
   } catch (error) {
-    yield call(errorSaga, error);
+    yield call(errorSaga, error, ApiConstants.API_MOVE_PLAYER_LOAD_ERROR);
   }
 }
 
@@ -623,7 +623,7 @@ export function* replicatePlayerGetCompetitionsSaga(action) {
     if (result.status === 1) {
       yield put({
         type: ApiConstants.API_REPLICATE_PLAYER_GET_COMPETITION_LIST_SUCCESS,
-        result: result.result.data,
+        result: result.result.data.result,
         status: result.status,
       });
     } else {
@@ -677,11 +677,11 @@ export function* replicatePlayersSubmitSaga(action) {
         result: result.result.data.result,
         status: result.result.data.status,
       });
-      message.success(AppConstants.moveMessageSuccess);
+      message.success(AppConstants.replicateMessageSuccess);
     } else {
-      yield call(failSaga, result);
+      yield call(failSaga, result, ApiConstants.API_REPLICATE_PLAYER_SUBMIT_ERROR);
     }
   } catch (error) {
-    yield call(errorSaga, error);
+    yield call(errorSaga, error, ApiConstants.API_REPLICATE_PLAYER_SUBMIT_ERROR);
   }
 }

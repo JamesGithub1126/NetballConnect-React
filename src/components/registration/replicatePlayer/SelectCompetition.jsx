@@ -17,8 +17,8 @@ const SelectCompetition = React.memo(({ competitions, renderItem, ...props }) =>
         {...props}
       >
         {(competitions || []).map((item, index) => (
-          <Select.Option key={index} value={item.uniqueKey} label={item.name}>
-            {item.name} ({item.organisationName})
+          <Select.Option key={index} value={item.compUniqueKey} label={item.competitionName}>
+            {item.competitionName} ({item.organiserName})
           </Select.Option>
         ))}
       </Select>

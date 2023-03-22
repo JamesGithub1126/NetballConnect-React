@@ -89,13 +89,17 @@ const columns = [
     title: AppConstants.verifiedScores,
     dataIndex: 'verifiedScores',
     key: 'verifiedScores',
-    render: (verifiedScores, record) => <span>{record.verifiedScores ? 'Yes' : 'No'}</span>,
+    render: (verifiedScores, record) => (
+      <span>{record.verifiedScores ? record.verifiedScores : ''}</span>
+    ),
   },
   {
     title: AppConstants.verifiedActionLog,
     dataIndex: 'verifiedActionLogs',
     key: 'verifiedActionLogs',
-    render: (verifiedActionLogs, record) => <span>{record.verifiedActionLogs ? 'Yes' : 'No'}</span>,
+    render: (verifiedActionLogs, record) => (
+      <span>{record.verifiedActionLogs ? record.verifiedActionLogs : ''}</span>
+    ),
   },
   {
     title: AppConstants.submittedSendOffReports,

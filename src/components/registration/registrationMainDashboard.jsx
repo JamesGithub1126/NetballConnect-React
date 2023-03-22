@@ -611,7 +611,7 @@ class RegistrationMainDashboard extends Component {
                     <NavLink
                       to={{
                         pathname: `/registrationCompetitionFee`,
-                        state: { id: null, isEdit: false },
+                        state: { id: null, isEdit: false, isNewComp: true },
                       }}
                       className="text-decoration-none"
                     >

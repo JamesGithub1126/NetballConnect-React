@@ -1,0 +1,5 @@
+.input-align-right {
+  text-align: end;
+  justify-content: flex-end;
+  width: 100%;
+}

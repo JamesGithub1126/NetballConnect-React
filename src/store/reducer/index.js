@@ -89,7 +89,7 @@ import liveScorePlayerActionState from './liveScoreReducer/liveScorePlayerAction
 
 import UmpirePaymentState from './umpireReducer/umpirePaymentReducer';
 import UmpirePoolAllocationState from './umpireReducer/umpirePoolAllocationReducer';
-import MovePlayerState from '../reducer/moveFAPlayerReducer/FAplayerReducer';
+import MovePlayerState from '../reducer/moveFAPlayerReducer';
 import ReplicatePlayerState from './replicatePlayerReducer';
 
 // Communication

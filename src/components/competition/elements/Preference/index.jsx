@@ -340,7 +340,6 @@ export default class Preferences extends React.Component {
         PreferenceSetBy: 'PreferenceSetBy',
       });
       if (result.status === 1) {
-        console.log(result.result.data);
         let preferenceSetByList = result.result.data.PreferenceSetBy || [];
         this.setState({ preferenceSetByList });
       } else {
@@ -753,9 +752,14 @@ export default class Preferences extends React.Component {
               className="reg-competition-radio"
               onChange={this.onAllowTeamPreferencesChanged}
               defaultValue={0}
+              disabled={this.props.disabled}
             >
-              <Radio value={0} data-testid={AppUniqueId.TEAM_PREFERENCE_NO}>{AppConstants.no}</Radio>
-              <Radio value={1} data-testid={AppUniqueId.TEAM_PREFERENCE_YES}>{AppConstants.yes}</Radio>
+              <Radio value={0} data-testid={AppUniqueId.TEAM_PREFERENCE_NO}>
+                {AppConstants.no}
+              </Radio>
+              <Radio value={1} data-testid={AppUniqueId.TEAM_PREFERENCE_YES}>
+                {AppConstants.yes}
+              </Radio>
             </Radio.Group>
           </Form.Item>
           {this.props.hasInvitedAffiliates && allowTeamPreferences ? (
@@ -767,7 +771,11 @@ export default class Preferences extends React.Component {
                   onChange={this.onTeamPreferencesSetByChanged}
                 >
                   {preferenceSetByList.map(item => (
-                    <Radio key={`teamPreferencesSetBy_${item.id}`} value={item.id} data-testid={AppUniqueId.SELECT_BUTTON + item.description}>
+                    <Radio
+                      key={`teamPreferencesSetBy_${item.id}`}
+                      value={item.id}
+                      data-testid={AppUniqueId.SELECT_BUTTON + item.description}
+                    >
                       {item.description}
                     </Radio>
                   ))}
@@ -783,7 +791,10 @@ export default class Preferences extends React.Component {
                 heading={AppConstants.whichPreferencesAllowToBeSet}
               />
               <Form.Item name="round1HomeAndAwayPreference" valuePropName="checked">
-                <Checkbox data-testid={AppUniqueId.TEAM_PREFERENCE + 'round1HomeAndAwayPreference'} onChange={this.onRound1HomeAndAwayPreferenceChanged}>
+                <Checkbox
+                  data-testid={AppUniqueId.TEAM_PREFERENCE + 'round1HomeAndAwayPreference'}
+                  onChange={this.onRound1HomeAndAwayPreferenceChanged}
+                >
                   <span className="sub-label">{AppConstants.round1HomeAndAwayPreference}</span>
                 </Checkbox>
               </Form.Item>
@@ -792,7 +803,10 @@ export default class Preferences extends React.Component {
               ) : null}
 
               <Form.Item name="competitionDayAndTimePreference" valuePropName="checked">
-                <Checkbox data-testid={AppUniqueId.TEAM_PREFERENCE + 'competitionDayAndTimePreference'} onChange={this.onCompetitionDayAndTimePreferenceChanged}>
+                <Checkbox
+                  data-testid={AppUniqueId.TEAM_PREFERENCE + 'competitionDayAndTimePreference'}
+                  onChange={this.onCompetitionDayAndTimePreferenceChanged}
+                >
                   <span className="sub-label">{AppConstants.competitionDayAndTimePreference}</span>
                 </Checkbox>
               </Form.Item>
@@ -802,7 +816,10 @@ export default class Preferences extends React.Component {
               ) : null}
 
               <Form.Item name="homeFieldPreference" valuePropName="checked">
-                <Checkbox data-testid={AppUniqueId.TEAM_PREFERENCE + 'homeFieldPreference'} onChange={this.onHomeFieldPreferenceChanged}>
+                <Checkbox
+                  data-testid={AppUniqueId.TEAM_PREFERENCE + 'homeFieldPreference'}
+                  onChange={this.onHomeFieldPreferenceChanged}
+                >
                   <span className="sub-label">{AppConstants.homeFieldPreference}</span>
                 </Checkbox>
               </Form.Item>

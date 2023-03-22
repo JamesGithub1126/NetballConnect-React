@@ -9,7 +9,6 @@ const SelectDivision = React.memo(({divisions, hidden, ...props}) => {
       <Span>{AppConstants.division}</Span>
       <Select
         showSearch
-        placeholder="Please Select an Age Group"
         optionFilterProp="children"
         filterOption={(input, option) =>
           (option?.label ?? '').toLowerCase().includes(input.toLowerCase())

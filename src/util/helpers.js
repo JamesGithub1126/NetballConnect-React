@@ -237,6 +237,17 @@ const getAmountWithTax = (amount, isTaxable) => {
   return amount * (1 + (isTaxable ? 0.1 : 0));
 };
 
+export const queryfie = string => {
+  return string
+    .slice(1)
+    .split('&')
+    .map(q => q.split('='))
+    .reduce((a, c) => {
+      a[c[0]] = c[1];
+      return a;
+    }, {});
+};
+
 const getTimeZone = () => {
   return Intl.DateTimeFormat().resolvedOptions().timeZone;
 };

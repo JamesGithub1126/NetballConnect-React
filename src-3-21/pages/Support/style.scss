@@ -1,0 +1,168 @@
+@import '../../themes/colorVariables.css';
+
+.support-panel {
+  position: absolute;
+  width: 100%;
+  height: calc(100% - 77px);
+  display: flex;
+  overflow: hidden;
+  background: #fff;
+  font-family: inter, sans-serif;
+  font-size: 15px;
+
+  img {
+    max-width: 100%;
+  }
+}
+
+.support-side-bar {
+  min-width: 241px;
+  height: 100%;
+  display: flex;
+  flex: 1.5;
+  flex-direction: column;
+  overflow: auto;
+  border-right: 1px solid rgba(27, 27, 52, 0.07);
+
+  .separator {
+    margin: 0 15px;
+  }
+}
+
+.search-box {
+  margin: 15px;
+  font-size: 15px;
+}
+
+.side-bar-item {
+  width: 100%;
+  font-family: inter, sans-serif;
+  font-size: 15px;
+
+  ul {
+    margin: 0;
+    padding: 10px 15px;
+    font-size: 15px;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--app-f1c2a2);
+    }
+
+    &:active {
+      background-color: var(--app-ff6c4f);
+    }
+
+    > i {
+      width: 20px;
+      text-align: center;
+      transition-duration: 0.3s;
+    }
+
+    .child-leaf {
+      padding: 5px 0 5px 40px;
+    }
+  }
+}
+
+iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.separator {
+  height: 1px;
+  background: rgba(152, 166, 173, 0.5);
+}
+
+.support-content-panel {
+  padding: 20px 30px;
+  overflow: auto;
+  flex: 5;
+  font-size: 15px;
+
+  * {
+    line-height: 2;
+  }
+
+  ul {
+    list-style: disc;
+  }
+
+  li {
+    margin-left: 20px;
+    flex: 5;
+  }
+}
+
+.side-bar-child-item {
+  margin-left: 15px;
+}
+
+.tree-collapse {
+  transform: rotate(90deg);
+}
+
+.tree-not-collapse {
+}
+
+.tree-item-hide {
+  transition-duration: 0.5s;
+  overflow: hidden;
+  animation-name: hide;
+  animation-duration: 0.5s;
+  animation-fill-mode: forwards;
+}
+
+.tree-item-show {
+  transition-duration: 0.5s;
+  overflow: hidden;
+  animation-name: show;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes show {
+  0% {
+    display: none;
+    max-height: 0;
+  }
+  1% {
+    max-height: 1px;
+  }
+  80% {
+    max-height: 150px;
+  }
+  100% {
+    max-height: 1000px;
+  }
+}
+
+@keyframes hide {
+  0% {
+    max-height: 1000px;
+  }
+  1% {
+    max-height: 150px;
+  }
+  80% {
+    max-height: 1px;
+  }
+  100% {
+    max-height: 0;
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .support-side-bar {
+    display: flex;
+    flex: 5;
+    flex-direction: column;
+    overflow-y: scroll;
+    background-color: var(--app-fbf1ea);
+  }
+}

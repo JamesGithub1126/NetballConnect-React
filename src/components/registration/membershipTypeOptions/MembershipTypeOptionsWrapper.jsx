@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { onChangeAgeCheckBoxAction } from 'store/actions/registrationAction/registration';
 import AppConstants from 'themes/appConstants';
-import ModalSpan from '../moveFromCompetitionFootball/ModalSpan';
+import ModalSpan from '../replicatePlayer/Span';
 import SearchAbleRoleSelect from './SearchAbleRoleSelect';
 import './MembershipTypeOptionsStyle.css';
 import { useEffect } from 'react';

@@ -14,6 +14,7 @@ import history from 'util/history';
 import { getLiveScoreCompetition } from 'util/sessionStorage';
 import { Footer } from 'antd/lib/layout/layout';
 import styles from '../actionLog.module.scss';
+import { isBasketball, isFootball } from 'util/registrationHelper';
 
 const { Content } = Layout;
 
@@ -32,8 +33,13 @@ const LiveScoreActionLog = ({ location }) => {
       history.push('/matchDayMatches');
     } else {
       const comp = JSON.parse(getLiveScoreCompetition());
-
-      dispatch(liveScoreGetMatchDetailInitiate(matchId, comp?.lineupSelectionEnabled ? 1 : 0));
+      const lineupOnByDefault = isBasketball || isFootball;
+      dispatch(
+        liveScoreGetMatchDetailInitiate(
+          matchId,
+          comp?.lineupSelectionEnabled || lineupOnByDefault ? 1 : 0,
+        ),
+      );
       dispatch(liveScoreGetMatchEventsAction({ matchId: matchId }));
     }
   }, [location?.state?.matchId]);

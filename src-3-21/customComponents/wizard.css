@@ -1,0 +1,30 @@
+.tickView {
+  width: 20%;
+  display: flex;
+  justify-content: flex-end;
+  /* background: red; */
+  padding-right: 0px;
+  align-items: center;
+}
+.serialView {
+  width: 20%;
+}
+
+.setupView {
+  width: 60%;
+}
+
+.division .ant-form-item-control {
+  line-height: 18px;
+}
+
+.modalFooter .ant-modal-footer {
+  display: none;
+}
+.modal-custom-footer {
+  padding: 10px 16px;
+  text-align: right;
+  background: transparent;
+  border-top: 1px solid #e8e8e8;
+  border-radius: 0 0 4px 4px;
+}

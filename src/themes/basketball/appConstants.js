@@ -622,6 +622,7 @@ const AppConstants = {
   selectDivision: 'Select Division',
   selectGrade: 'Select Grade',
   pleaseSelectCourtId: 'Please select court id',
+  pleaseSelectDivision: 'Please Select a Division',
   round_1: 'Round 1',
   round_2: 'Round 2',
   selectRoundOne: 'Select Round 1',
@@ -1869,6 +1870,8 @@ const AppConstants = {
   umpireSettingChangeMessage: `You can only enable "Enter scores after the match" if the "Integrated Referee Module" is used.\n\n
                               Would you like to clear your settings for "when scoring will occur"?`,
   umpireAvailability: 'Referee Availability',
+  myUmpiringAvailability: 'My Refereeing Availability',
+  please_sel_umpire_unavailable_time: 'Please select the dates/times you are unavailable to referee and click Save.',
   divOrGrade: 'Div/Grade',
   allowAnyoneToBeUmpire: 'Allow anyone linked to the competition to be assigned as an referee',
   reselectAtCourtUmpiresMsg1: 'The following referees were recorded at court:',

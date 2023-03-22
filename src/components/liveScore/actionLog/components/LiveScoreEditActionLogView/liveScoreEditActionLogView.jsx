@@ -62,10 +62,11 @@ const LiveScoreEditActionLogView = React.memo(() => {
     if (!lastUpdated) {
       return;
     }
+    const lineupOnByDefault = isBasketball || isFootball;
     dispatch(
       liveScoreGetMatchDetailInitiate(
         match.id,
-        liveScoreCompetition?.lineupSelectionEnabled ? 0 : 1,
+        liveScoreCompetition?.lineupSelectionEnabled || lineupOnByDefault ? 1 : 0,
       ),
     );
     dispatch(liveScoreGetMatchEventsAction({ matchId }));

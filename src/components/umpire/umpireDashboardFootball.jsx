@@ -384,8 +384,7 @@ const columnsInvite = [
               <Menu.Item key="editUmpire">
                 <div onClick={() => this_obj.editUmpire(record)}>{AppConstants.editOfficials}</div>
               </Menu.Item>
-            )
-          }
+            )}
           <Menu.Item key="3">
             <NavLink
               to={{
@@ -1330,9 +1329,7 @@ class UmpireDashboard extends Component {
     const allColumns = [...(umpireType === 'USERS' ? columnsInvite : columns)];
     const allColumnsExceptAction = allColumns.slice(0, -1);
     if (numberOfOfficials > 0) {
-      for (const sequence of Array.from({ length: numberOfOfficials }).map(
-        (_, i) => i + 1,
-      )) {
+      for (const sequence of Array.from({ length: numberOfOfficials }).map((_, i) => i + 1)) {
         allColumnsExceptAction.push({
           title: `${AppConstants.officialStatisticians} ${sequence}`,
           dataIndex: 'officials',
@@ -1799,7 +1796,7 @@ class UmpireDashboard extends Component {
   render() {
     return (
       <div className="fluid-width default-bg">
-        <DashboardLayout menuHeading={AppConstants.umpires} menuName={AppConstants.umpires} />
+        <DashboardLayout menuHeading={AppConstants.officials} menuName={AppConstants.officials} />
 
         <InnerHorizontalMenu menu="umpire" umpireSelectedKey="1" />
 

@@ -1,0 +1,9 @@
+.org-info {
+  padding-top: 10px;
+}
+
+.org-info .org-label {
+  margin-left: 15px;
+  font-weight: 700;
+  margin-right: 5px;
+}

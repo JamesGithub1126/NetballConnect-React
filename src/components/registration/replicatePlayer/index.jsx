@@ -6,6 +6,7 @@ import AppConstants from 'themes/appConstants';
 import { replicatePlayersAction } from 'store/actions/replicatePlayerAction';
 import Loader from '../../../customComponents/loader';
 
+import validate from '../replicatePlayer/validation';
 import Content from './Content';
 
 const ReplicatePlayerModal = ({ selectedPlayers, onChancel }) => {
@@ -13,6 +14,9 @@ const ReplicatePlayerModal = ({ selectedPlayers, onChancel }) => {
   const dispatch = useDispatch();
 
   const handleSubmit = useCallback(() => {
+    if (!validate(selections)) {
+      return;
+    }
     const registrationIds = selectedPlayers.map(i => ({
       userId: i.userId,
       registrationId: i.registrationId,
@@ -22,7 +26,12 @@ const ReplicatePlayerModal = ({ selectedPlayers, onChancel }) => {
       registrationIds,
     };
     dispatch(replicatePlayersAction(payload));
+    Modal.destroyAll();
   }, [dispatch, selectedPlayers, selections]);
+
+  if (!modalVisible) {
+    return <></>;
+  }
 
   return (
     <>

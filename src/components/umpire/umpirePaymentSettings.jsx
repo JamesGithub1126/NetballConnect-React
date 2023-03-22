@@ -2,9 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { NavLink } from 'react-router-dom';
-import {
-  Layout, Breadcrumb, Select, Button, Form, Checkbox, Radio, Modal, message,
-} from 'antd';
+import { Layout, Breadcrumb, Select, Button, Form, Checkbox, Radio, Modal, message } from 'antd';
 
 import { umpireYearChangedAction } from 'store/actions/umpireAction/umpireDashboardAction';
 import { getCurrentYear } from 'util/permissions';
@@ -34,10 +32,10 @@ import {
 import { liveScoreGetDivision } from '../../store/actions/LiveScoreAction/liveScoreTeamAction';
 import { getUmpirePoolData } from '../../store/actions/umpireAction/umpirePoolAllocationAction';
 import { getRefBadgeData, getOnlyYearListAction } from '../../store/actions/appAction';
-import { getUmpireSequencesFromSettings } from "../../util/umpireHelper";
-import { getUmpireField } from "../../store/reducer/liveScoreReducer/helpers/matchUmpires/umpireHelpers";
-import { UmpireSequence } from "../../enums/enums";
-import { RegistrationUserRoles } from "../../enums/registrationEnums";
+import { getUmpireSequencesFromSettings } from '../../util/umpireHelper';
+import { getUmpireField } from '../../store/reducer/liveScoreReducer/helpers/matchUmpires/umpireHelpers';
+import { UmpireSequence } from '../../enums/enums';
+import { RegistrationUserRoles } from '../../enums/registrationEnums';
 
 const { Header, Content } = Layout;
 const { Option } = Select;
@@ -84,7 +82,9 @@ class UmpirePaymentSetting extends Component {
     const { organisationId } = getOrganisationData() || {};
     this.setState({ loading: true });
     this.props.getOnlyYearListAction();
-    if (organisationId) { this.props.umpireCompetitionListAction(null, this.state.yearRefId, organisationId, 'USERS'); }
+    if (organisationId) {
+      this.props.umpireCompetitionListAction(null, this.state.yearRefId, organisationId, 'USERS');
+    }
     this.props.getRefBadgeData();
   }
 
@@ -98,10 +98,11 @@ class UmpirePaymentSetting extends Component {
         ? JSON.parse(getLiveScoreCompetition())
         : null;
       const globalYear = Number(getGlobalYear());
-      const canUseExistingComp = !!livescoresCompetition?.id
-        && !!organisationId
-        && livescoresCompetition.yearRefId === globalYear
-        && [
+      const canUseExistingComp =
+        !!livescoresCompetition?.id &&
+        !!organisationId &&
+        livescoresCompetition.yearRefId === globalYear &&
+        [
           livescoresCompetition?.competitionOrganisation?.orgId,
           livescoresCompetition.organisationId,
         ].includes(organisationId);
@@ -109,7 +110,7 @@ class UmpirePaymentSetting extends Component {
       let competition = null;
 
       if (canUseExistingComp) {
-        competition = compList.find((c) => c.id === livescoresCompetition.id);
+        competition = compList.find(c => c.id === livescoresCompetition.id);
       }
       if (!competition) {
         // get the first comp in the list
@@ -126,7 +127,7 @@ class UmpirePaymentSetting extends Component {
 
       const competitionListCopy = JSON.parse(JSON.stringify(compList));
 
-      competitionListCopy.forEach((item) => {
+      competitionListCopy.forEach(item => {
         if (item.organisationId === organisationId) {
           item.isOrganiser = true;
         } else {
@@ -134,7 +135,7 @@ class UmpirePaymentSetting extends Component {
         }
       });
 
-      const isOrganiser = competitionListCopy.find((comp) => comp.id === competitionId)?.isOrganiser;
+      const isOrganiser = competitionListCopy.find(comp => comp.id === competitionId)?.isOrganiser;
 
       this.setState({
         competitionList: competitionListCopy,
@@ -156,9 +157,9 @@ class UmpirePaymentSetting extends Component {
     }
 
     if (
-      (!this.props.umpirePoolAllocationState.onLoad
-        && prevProps.umpirePoolAllocationState.onLoad)
-      || (prevState.selectedComp !== this.state.selectedComp && !prevState.selectedComp)
+      (!this.props.umpirePoolAllocationState.onLoad &&
+        prevProps.umpirePoolAllocationState.onLoad) ||
+      (prevState.selectedComp !== this.state.selectedComp && !prevState.selectedComp)
     ) {
       const reqData = {
         organisationId,
@@ -173,9 +174,9 @@ class UmpirePaymentSetting extends Component {
     }
 
     if (
-      !this.props.umpirePaymentSettingState.onLoad
-      && prevProps.umpirePaymentSettingState.onLoad
-      && this.props.umpirePaymentSettingState.paymentSettingsData
+      !this.props.umpirePaymentSettingState.onLoad &&
+      prevProps.umpirePaymentSettingState.onLoad &&
+      this.props.umpirePaymentSettingState.paymentSettingsData
     ) {
       this.modifyGetSettingsData();
     }
@@ -193,78 +194,90 @@ class UmpirePaymentSetting extends Component {
   modifyGetSettingsData = () => {
     const { organisationId } = getOrganisationData() || {};
     const { divisionList } = this.props.liveScoreTeamState;
-    const { officialPaymentSettings, allowedDivisionsSettings, isDirectCompetition } = this.props.umpirePaymentSettingState?.paymentSettingsData;
+    const { officialPaymentSettings, allowedDivisionsSettings, isDirectCompetition } =
+      this.props.umpirePaymentSettingState?.paymentSettingsData;
     const { allowUmpiresPayments } = this.props.umpirePaymentSettingState;
     const { isOrganiserView, competition } = this.state;
     const selectedDivisions = [];
 
-    const umpirePaymentSettingsArray = !!officialPaymentSettings && !!officialPaymentSettings.length
-      ? officialPaymentSettings.map((settingsItem) => ({
-        id: settingsItem.id,
-        allDivisions: settingsItem.allDivisions,
-        divisions: settingsItem.divisions,
-        UmpirePaymentFeeType: settingsItem.UmpirePaymentFeeType,
-        officials: settingsItem.officials?.map((official) => ({
-          id: official.id,
-          roleId: official.roleId,
-          rate: official.rate,
-          sequence: official.sequence,
-        })),
-        byBadge: settingsItem.byBadge.length
-          ? settingsItem.byBadge.map((byBadgeSetting) => ({
-            id: byBadgeSetting.id,
-            umpirePaymentSettingId: byBadgeSetting.umpirePaymentSettingId,
-            accreditationUmpireRefId: byBadgeSetting.accreditationUmpireRefId,
-            rates: byBadgeSetting.rates.map((rate) => ({
-              id: rate.id,
-              umpirePaymentFeeByBadgeId: rate.umpirePaymentFeeByBadgeId,
-              umpirePaymentFeeByPoolId: rate.umpirePaymentFeeByPoolId,
-              roleId: rate.roleId,
-              rate: rate.rate,
-              sequence: rate.sequence,
+    const umpirePaymentSettingsArray =
+      !!officialPaymentSettings && !!officialPaymentSettings.length
+        ? officialPaymentSettings.map(settingsItem => ({
+            id: settingsItem.id,
+            allDivisions: settingsItem.allDivisions,
+            divisions: settingsItem.divisions,
+            UmpirePaymentFeeType: settingsItem.UmpirePaymentFeeType,
+            officials: settingsItem.officials?.map(official => ({
+              id: official.id,
+              roleId: official.roleId,
+              rate: official.rate,
+              sequence: official.sequence,
             })),
+            byBadge: settingsItem.byBadge.length
+              ? settingsItem.byBadge.map(byBadgeSetting => ({
+                  id: byBadgeSetting.id,
+                  umpirePaymentSettingId: byBadgeSetting.umpirePaymentSettingId,
+                  accreditationUmpireRefId: byBadgeSetting.accreditationUmpireRefId,
+                  rates: byBadgeSetting.rates.map(rate => ({
+                    id: rate.id,
+                    umpirePaymentFeeByBadgeId: rate.umpirePaymentFeeByBadgeId,
+                    umpirePaymentFeeByPoolId: rate.umpirePaymentFeeByPoolId,
+                    roleId: rate.roleId,
+                    rate: rate.rate,
+                    sequence: rate.sequence,
+                  })),
+                }))
+              : [],
+            byPool: settingsItem.byPool.length
+              ? settingsItem.byPool.map(byPoolSetting => ({
+                  id: byPoolSetting.id,
+                  umpirePaymentSettingId: byPoolSetting.umpirePaymentSettingId,
+                  umpirePoolId: byPoolSetting.umpirePoolId,
+                  rates: byPoolSetting.rates.map(rate => ({
+                    id: rate.id,
+                    umpirePaymentFeeByBadgeId: rate.umpirePaymentFeeByBadgeId,
+                    umpirePaymentFeeByPoolId: rate.umpirePaymentFeeByPoolId,
+                    roleId: rate.roleId,
+                    rate: rate.rate,
+                    sequence: rate.sequence,
+                  })),
+                }))
+              : [],
+            hasSettings: true,
+            savedBy: settingsItem.savedBy,
           }))
-          : [],
-        byPool: settingsItem.byPool.length
-          ? settingsItem.byPool.map((byPoolSetting) => ({
-            id: byPoolSetting.id,
-            umpirePaymentSettingId: byPoolSetting.umpirePaymentSettingId,
-            umpirePoolId: byPoolSetting.umpirePoolId,
-            rates: byPoolSetting.rates.map((rate) => ({
-              id: rate.id,
-              umpirePaymentFeeByBadgeId: rate.umpirePaymentFeeByBadgeId,
-              umpirePaymentFeeByPoolId: rate.umpirePaymentFeeByPoolId,
-              roleId: rate.roleId,
-              rate: rate.rate,
-              sequence: rate.sequence,
-            })),
-          }))
-          : [],
-        hasSettings: true,
-        savedBy: settingsItem.savedBy,
-      }))
-      : [];
+        : [];
 
     const allowedDivisionsSettingArray = allowedDivisionsSettings.length
-      ? allowedDivisionsSettings.map((allowedDivisionsSetting) => ({
-        allDivisions: allowedDivisionsSetting?.allDivisions || false,
-        divisions: allowedDivisionsSetting?.divisions || [],
-        hasSettings: false,
-        savedBy: allowedDivisionsSetting?.savedBy,
-      })) : [];
+      ? allowedDivisionsSettings.map(allowedDivisionsSetting => ({
+          allDivisions: allowedDivisionsSetting?.allDivisions || false,
+          divisions: allowedDivisionsSetting?.divisions || [],
+          hasSettings: false,
+          savedBy: allowedDivisionsSetting?.savedBy,
+        }))
+      : [];
 
     let paymentSettingType;
     if (isOrganiserView) {
       paymentSettingType = 'ORGANISER';
     } else {
-      paymentSettingType = competition.officialOrganisationId === organisationId ? 'OFFICIAL_ORGANISATION' : 'AFFILIATE';
+      paymentSettingType =
+        competition.officialOrganisationId === organisationId
+          ? 'OFFICIAL_ORGANISATION'
+          : 'AFFILIATE';
     }
-    const affiliateViewSettingsArray = !isOrganiserView && !officialPaymentSettings.length
-      ? [{
-        ...initialPaymentSettingsData,
-        savedBy: competition.officialOrganisationId === organisationId ? 'OFFICIAL_ORGANISATION' : 'AFFILIATE',
-      }]
-      : umpirePaymentSettingsArray;
+    const affiliateViewSettingsArray =
+      !isOrganiserView && !officialPaymentSettings.length
+        ? [
+            {
+              ...initialPaymentSettingsData,
+              savedBy:
+                competition.officialOrganisationId === organisationId
+                  ? 'OFFICIAL_ORGANISATION'
+                  : 'AFFILIATE',
+            },
+          ]
+        : umpirePaymentSettingsArray;
 
     const newPaymentSettingsData = isOrganiserView
       ? [...umpirePaymentSettingsArray, ...allowedDivisionsSettingArray]
@@ -274,14 +287,16 @@ class UmpirePaymentSetting extends Component {
     if (isOrganiserView) {
       allowedDivisionList = divisionList;
     } else if (allowedDivisionsSettings.length) {
-      const allowedDivisionsSetting = allowedDivisionsSettings.find((setting) => setting.savedBy === paymentSettingType);
+      const allowedDivisionsSetting = allowedDivisionsSettings.find(
+        setting => setting.savedBy === paymentSettingType,
+      );
       if (allowedDivisionsSetting.allDivisions) {
         allowedDivisionList = divisionList;
       } else {
         allowedDivisionList = allowedDivisionsSetting.divisions;
       }
     }
-    newPaymentSettingsData.forEach((item) => {
+    newPaymentSettingsData.forEach(item => {
       item?.allDivisions && allowedDivisionList
         ? selectedDivisions.push(...allowedDivisionList)
         : selectedDivisions.push(...item?.divisions);
@@ -306,40 +321,48 @@ class UmpirePaymentSetting extends Component {
     if (isBoxHasSettings) {
       const initialSettingsBoxData = JSON.parse(JSON.stringify(initialPaymentSettingsData));
       const noSettingsDataState = paymentSettingsData
-        ? paymentSettingsData.filter((item) => !item.hasSettings)
+        ? paymentSettingsData.filter(item => !item.hasSettings)
         : [];
 
       if (e.target.checked) {
         newSettingsData = initialSettingsBoxData
-          ? [...noSettingsDataState, {
-            ...initialSettingsBoxData,
-            savedBy: type,
-          }]
+          ? [
+              ...noSettingsDataState,
+              {
+                ...initialSettingsBoxData,
+                savedBy: type,
+              },
+            ]
           : [...noSettingsDataState];
       } else {
         newSettingsData = [...noSettingsDataState];
       }
     } else if (e.target.checked) {
       if (paymentSettingsData) {
-        if (!paymentSettingsData.some((item) => item.savedBy === type)) {
-          newSettingsData = [...paymentSettingsData, {
-            ...initialNoSettingsData,
-            savedBy: type,
-          }];
+        if (!paymentSettingsData.some(item => item.savedBy === type)) {
+          newSettingsData = [
+            ...paymentSettingsData,
+            {
+              ...initialNoSettingsData,
+              savedBy: type,
+            },
+          ];
         }
       } else {
-        newSettingsData = [{
-          ...initialNoSettingsData,
-          savedBy: type,
-        }];
+        newSettingsData = [
+          {
+            ...initialNoSettingsData,
+            savedBy: type,
+          },
+        ];
       }
     } else {
       newSettingsData = paymentSettingsData
-        ? [...paymentSettingsData.filter((item) => !!item?.hasSettings || item.savedBy !== type)]
+        ? [...paymentSettingsData.filter(item => !!item?.hasSettings || item.savedBy !== type)]
         : [];
     }
 
-    newSettingsData.forEach((item) => {
+    newSettingsData.forEach(item => {
       item?.allDivisions && allowedDivisionList && newSelectedDivisions
         ? newSelectedDivisions.push(...allowedDivisionList)
         : newSelectedDivisions.push(...item?.divisions);
@@ -368,11 +391,11 @@ class UmpirePaymentSetting extends Component {
 
     const newPaymentSettingsData = sectionDataCopy
       ? paymentSettingsData
-        ? [...sectionDataCopy, ...paymentSettingsData.filter((item) => !item.hasSettings)]
+        ? [...sectionDataCopy, ...paymentSettingsData.filter(item => !item.hasSettings)]
         : [...sectionDataCopy]
       : paymentSettingsData
-        ? [...paymentSettingsData.filter((item) => !item.hasSettings)]
-        : [];
+      ? [...paymentSettingsData.filter(item => !item.hasSettings)]
+      : [];
 
     this.setState({
       paymentSettingsData: newPaymentSettingsData,
@@ -384,11 +407,11 @@ class UmpirePaymentSetting extends Component {
     const paymentSettingsDataCopy = JSON.parse(JSON.stringify(paymentSettingsData));
 
     const targetSectionData = paymentSettingsDataCopy
-      ? paymentSettingsDataCopy.filter((item) => item.savedBy === sectionData[0].savedBy)
+      ? paymentSettingsDataCopy.filter(item => item.savedBy === sectionData[0].savedBy)
       : [];
 
     const otherSectionData = paymentSettingsDataCopy
-      ? paymentSettingsDataCopy.filter((item) => item.savedBy !== sectionData[0].savedBy)
+      ? paymentSettingsDataCopy.filter(item => item.savedBy !== sectionData[0].savedBy)
       : [];
 
     if (key === 'allDivisions') {
@@ -419,7 +442,7 @@ class UmpirePaymentSetting extends Component {
 
     const newSelectedDivisions = [];
 
-    paymentSettingsDataCopy.forEach((item) => {
+    paymentSettingsDataCopy.forEach(item => {
       item.divisions = [];
       item.allDivisions = false;
     });
@@ -428,7 +451,8 @@ class UmpirePaymentSetting extends Component {
       newSelectedDivisions.concat([...allowedDivisionList]);
     }
 
-    targetSectionData[sectionDataIndex].divisions = !!value && allowedDivisionList ? allowedDivisionList : [];
+    targetSectionData[sectionDataIndex].divisions =
+      !!value && allowedDivisionList ? allowedDivisionList : [];
     targetSectionData[sectionDataIndex].allDivisions = value;
 
     const newPaymentSettingsData = [targetSectionData[sectionDataIndex]];
@@ -455,38 +479,43 @@ class UmpirePaymentSetting extends Component {
 
     const newSettingsData = [...otherSectionData, ...targetSectionData];
 
-    targetSectionData[sectionDataIndex].divisions = allowedDivisionList && allowedDivisionList.length
-      ? value.map((item) => allowedDivisionList.find((divisionListItem) => divisionListItem.id === item))
-      : [];
+    targetSectionData[sectionDataIndex].divisions =
+      allowedDivisionList && allowedDivisionList.length
+        ? value.map(item =>
+            allowedDivisionList.find(divisionListItem => divisionListItem.id === item),
+          )
+        : [];
 
-    newSettingsData.forEach((item) => {
+    newSettingsData.forEach(item => {
       newSelectedDivisions.push(...item.divisions);
     });
 
     const updatedSelectedDivisions = newSelectedDivisions.length ? newSelectedDivisions : [];
 
     if (
-      allowedDivisionList
-      && updatedSelectedDivisions
-      && updatedSelectedDivisions.length < allowedDivisionList.length
+      allowedDivisionList &&
+      updatedSelectedDivisions &&
+      updatedSelectedDivisions.length < allowedDivisionList.length
     ) {
-      newSettingsData.forEach((item) => {
+      newSettingsData.forEach(item => {
         item.allDivisions = false;
       });
     }
 
     if (
-      allowedDivisionList
-      && updatedSelectedDivisions
-      && updatedSelectedDivisions.length === allowedDivisionList.length
-      && value.length === allowedDivisionList.length
-      && Number.isInteger(sectionDataIndex)
-      && sectionDataIndex >= 0
+      allowedDivisionList &&
+      updatedSelectedDivisions &&
+      updatedSelectedDivisions.length === allowedDivisionList.length &&
+      value.length === allowedDivisionList.length &&
+      Number.isInteger(sectionDataIndex) &&
+      sectionDataIndex >= 0
     ) {
       const filteredNewSettings = newSettingsData
-        ? newSettingsData.filter((item) => item?.hasSettings === sectionData[0]?.hasSettings)
+        ? newSettingsData.filter(item => item?.hasSettings === sectionData[0]?.hasSettings)
         : [];
-      if (filteredNewSettings && filteredNewSettings.length > sectionDataIndex) { filteredNewSettings[sectionDataIndex].allDivisions = true; }
+      if (filteredNewSettings && filteredNewSettings.length > sectionDataIndex) {
+        filteredNewSettings[sectionDataIndex].allDivisions = true;
+      }
     }
 
     this.setState({
@@ -517,13 +546,13 @@ class UmpirePaymentSetting extends Component {
     } else {
       cellLineIdKey = rateListKey === 'byPool' ? 'umpirePoolId' : 'accreditationUmpireRefId';
 
-      rateLineData = rateList.find(
-        (data) => data[cellLineIdKey] === rateLineDataId,
-      )?.rates ?? [];
+      rateLineData = rateList.find(data => data[cellLineIdKey] === rateLineDataId)?.rates ?? [];
     }
     const shouldCreateNew = !rateLineData.length;
 
-    const rateDataForChangeIndex = rateLineData.findIndex((rate) => rate.roleId === rateRoleId && rate.sequence === sequence);
+    const rateDataForChangeIndex = rateLineData.findIndex(
+      rate => rate.roleId === rateRoleId && rate.sequence === sequence,
+    );
 
     if (rateDataForChangeIndex >= 0) {
       rateLineData[rateDataForChangeIndex].rate = rate;
@@ -545,44 +574,44 @@ class UmpirePaymentSetting extends Component {
 
     const newPaymentSettingsData = sectionDataCopy
       ? paymentSettingsData
-        ? [...sectionDataCopy, ...paymentSettingsData.filter((item) => !item.hasSettings)]
+        ? [...sectionDataCopy, ...paymentSettingsData.filter(item => !item.hasSettings)]
         : [...sectionDataCopy]
       : paymentSettingsData
-        ? [...paymentSettingsData.filter((item) => !item.hasSettings)]
-        : [];
+      ? [...paymentSettingsData.filter(item => !item.hasSettings)]
+      : [];
 
     this.setState({
       paymentSettingsData: newPaymentSettingsData,
     });
   };
 
-  handleClickDeleteModal = (sectionDataIndex) => {
+  handleClickDeleteModal = sectionDataIndex => {
     this.setState({
       deleteModalVisible: true,
       sectionDataToDeleteIndex: sectionDataIndex,
     });
   };
 
-  handleDeleteModal = (key) => {
+  handleDeleteModal = key => {
     if (key === 'ok') {
       const { paymentSettingsData, sectionDataToDeleteIndex } = this.state;
       const umpirePaymentSettingsCopy = paymentSettingsData
-        ? JSON.parse(JSON.stringify(paymentSettingsData.filter((item) => item.hasSettings)))
+        ? JSON.parse(JSON.stringify(paymentSettingsData.filter(item => item.hasSettings)))
         : [];
 
       umpirePaymentSettingsCopy.splice(sectionDataToDeleteIndex, 1);
 
       const newPaymentSettingsData = umpirePaymentSettingsCopy
         ? paymentSettingsData
-          ? [...umpirePaymentSettingsCopy, ...paymentSettingsData.filter((item) => !item.hasSettings)]
+          ? [...umpirePaymentSettingsCopy, ...paymentSettingsData.filter(item => !item.hasSettings)]
           : [...umpirePaymentSettingsCopy]
         : paymentSettingsData
-          ? [...paymentSettingsData.filter((item) => !item.hasSettings)]
-          : [];
+        ? [...paymentSettingsData.filter(item => !item.hasSettings)]
+        : [];
 
       const newSelectedDivisions = [];
 
-      newPaymentSettingsData.forEach((item) => {
+      newPaymentSettingsData.forEach(item => {
         newSelectedDivisions.push(...item.divisions);
       });
 
@@ -598,7 +627,7 @@ class UmpirePaymentSetting extends Component {
     });
   };
 
-  handleAllDivisionModal = (key) => {
+  handleAllDivisionModal = key => {
     const { tempPaymentSettingsData, tempSelectedDivisions } = this.state;
 
     if (key === 'ok') {
@@ -615,32 +644,35 @@ class UmpirePaymentSetting extends Component {
     });
   };
 
-  handleAddBox = (type) => {
+  handleAddBox = type => {
     const { paymentSettingsData } = this.state;
 
     const initialSettingsBoxData = JSON.parse(JSON.stringify(initialPaymentSettingsData));
 
-    const newPaymentSettingsData = [...paymentSettingsData, {
-      ...initialSettingsBoxData,
-      savedBy: type,
-    }];
+    const newPaymentSettingsData = [
+      ...paymentSettingsData,
+      {
+        ...initialSettingsBoxData,
+        savedBy: type,
+      },
+    ];
 
     this.setState({ paymentSettingsData: newPaymentSettingsData });
   };
 
-  onChangeComp = (compID) => {
+  onChangeComp = compID => {
     const { competitionList } = this.state;
 
-    const compObj = competitionList.find((competition) => competition.id === compID);
+    const compObj = competitionList.find(competition => competition.id === compID);
     const { isOrganiser } = compObj || {};
     this.props.liveScoreGetDivision(compID);
     setCompDataForAll(compObj);
     this.setState({ selectedComp: compID, competition: compObj, isOrganiserView: isOrganiser });
   };
 
-  modifyPostArray = (arr) => {
-    arr.forEach((item) => {
-      item.divisions = item.allDivisions ? [] : item.divisions.map((division) => division.id);
+  modifyPostArray = arr => {
+    arr.forEach(item => {
+      item.divisions = item.allDivisions ? [] : item.divisions.map(division => division.id);
       delete item.hasSettings;
     });
 
@@ -658,7 +690,7 @@ class UmpirePaymentSetting extends Component {
     } = this.state;
 
     // Validation for Competition Organiser
-    const compOrganiser = paymentSettingsData.find((i) => !!i.hasSettings);
+    const compOrganiser = paymentSettingsData.find(i => !!i.hasSettings);
     if (compOrganiser) {
       if (!compOrganiser.allDivisions && !compOrganiser.divisions.length) {
         message.error(AppConstants.selectDivisionToAddFees);
@@ -667,7 +699,7 @@ class UmpirePaymentSetting extends Component {
     }
 
     // Validation for Affiliate Organisations
-    const affiliates = paymentSettingsData.filter((i) => !i.hasSettings);
+    const affiliates = paymentSettingsData.filter(i => !i.hasSettings);
     if (affiliates.length) {
       for (const affiliate of affiliates) {
         if (!affiliate.allDivisions && !affiliate.divisions.length) {
@@ -681,24 +713,25 @@ class UmpirePaymentSetting extends Component {
 
     const affiliateSettingArray = paymentSettingsDataCopy
       ? paymentSettingsDataCopy.filter(
-        (item) => !item.hasSettings && (!!item.divisions.length || !!item.allDivisions),
-      )
+          item => !item.hasSettings && (!!item.divisions.length || !!item.allDivisions),
+        )
       : [];
 
     const umpirePaymentSettingsArray = paymentSettingsDataCopy
       ? paymentSettingsDataCopy.filter(
-        (item) => !!item.hasSettings && (!!item.divisions.length || !!item.allDivisions),
-      )
+          item => !!item.hasSettings && (!!item.divisions.length || !!item.allDivisions),
+        )
       : [];
 
     this.modifyPostArray(affiliateSettingArray);
     this.modifyPostArray(umpirePaymentSettingsArray);
 
     const allowedDivisionsSettings = allowPayment
-      ? affiliateSettingArray.filter((item) => (!!item.divisions.length || !!item.allDivisions))
+      ? affiliateSettingArray.filter(item => !!item.divisions.length || !!item.allDivisions)
       : null;
 
-    const umpirePaymentSettings = !!umpirePaymentSettingsArray.length && allowPayment ? umpirePaymentSettingsArray : [];
+    const umpirePaymentSettings =
+      !!umpirePaymentSettingsArray.length && allowPayment ? umpirePaymentSettingsArray : [];
 
     const bodyData = {
       noPaymentThroughPlatform: !allowPayment,
@@ -727,7 +760,7 @@ class UmpirePaymentSetting extends Component {
     this.props.saveUmpirePaymentSettings(saveData);
   };
 
-  setYear = (yearRefId) => {
+  setYear = yearRefId => {
     setGlobalYear(yearRefId);
     this.setState({ yearRefId });
     this.setState({ loading: true });
@@ -760,16 +793,13 @@ class UmpirePaymentSetting extends Component {
           <div className="row">
             <div className="col-sm-2">
               <div className="w-ft d-flex flex-row align-items-center" style={{ marginRight: 50 }}>
-                <span className="year-select-heading">
-                  {AppConstants.year}
-                  :
-                </span>
+                <span className="year-select-heading">{AppConstants.year}:</span>
                 <Select
                   className="year-select reg-filter-select-year ml-2"
-                  onChange={(e) => this.setYear(e)}
+                  onChange={e => this.setYear(e)}
                   value={this.state.yearRefId}
                 >
-                  {this.props.appState.yearList.map((item) => (
+                  {this.props.appState.yearList.map(item => (
                     <Option key={`year_${item.id}`} value={item.id}>
                       {item.description}
                     </Option>
@@ -779,10 +809,7 @@ class UmpirePaymentSetting extends Component {
             </div>
             <div className="col-sm-2">
               <div className="d-flex align-items-center" style={{ width: 'fit-content' }}>
-                <span className="year-select-heading">
-                  {AppConstants.competition}
-                  :
-                </span>
+                <span className="year-select-heading">{AppConstants.competition}:</span>
                 <Select
                   className="year-select reg-filter-select1 ml-2"
                   style={{ minWidth: 200 }}
@@ -790,8 +817,8 @@ class UmpirePaymentSetting extends Component {
                   value={this.state.selectedComp || ''}
                 >
                   {!this.state.selectedComp && <Option value="">All</Option>}
-                  {!!competitionList
-                    && competitionList.map((item) => (
+                  {!!competitionList &&
+                    competitionList.map(item => (
                       <Option key={`competition_${item.id}`} value={item.id}>
                         {item.longName}
                       </Option>
@@ -834,9 +861,7 @@ class UmpirePaymentSetting extends Component {
   };
 
   contentView = () => {
-    const {
-      isOrganiserView, paymentSettingType, allowPayment, isDirectCompetition,
-    } = this.state;
+    const { isOrganiserView, paymentSettingType, allowPayment, isDirectCompetition } = this.state;
 
     return (
       <div className="content-view mt-5">
@@ -851,7 +876,11 @@ class UmpirePaymentSetting extends Component {
                       {AppConstants.whoPayOfficial}
                     </span>
                     <div className="d-flex flex-column">
-                      {this.umpireSettingsSectionView('ORGANISER', AppConstants.competitionOrganiser, true)}
+                      {this.umpireSettingsSectionView(
+                        'ORGANISER',
+                        AppConstants.competitionOrganiser,
+                        true,
+                      )}
                       {this.umpireSettingsSectionView(
                         'AFFILIATE',
                         AppConstants.affiliateOrganisations,
@@ -887,40 +916,43 @@ class UmpirePaymentSetting extends Component {
 
     console.log(sectionTitle, hasSettings, paymentSettingsData);
 
-    const sectionData = hasSettings && !!paymentSettingsData
-      ? paymentSettingsData.filter((item) => item.hasSettings)
-      : paymentSettingsData
-        ? paymentSettingsData.filter((item) => !item.hasSettings && item.savedBy === type)
+    const sectionData =
+      hasSettings && !!paymentSettingsData
+        ? paymentSettingsData.filter(item => item.hasSettings)
+        : paymentSettingsData
+        ? paymentSettingsData.filter(item => !item.hasSettings && item.savedBy === type)
         : [];
 
-    const getAvailableDivisions = (boxData) => {
+    const getAvailableDivisions = boxData => {
       let availableDivisions = [];
       if (
-        boxData
-        && boxData.allDivisions
-        && allowedDivisionList
-        && Array.isArray(allowedDivisionList)
+        boxData &&
+        boxData.allDivisions &&
+        allowedDivisionList &&
+        Array.isArray(allowedDivisionList)
       ) {
-        availableDivisions = allowedDivisionList.map((division) => division.id);
+        availableDivisions = allowedDivisionList.map(division => division.id);
       } else if (boxData && !boxData.allDivisions && boxData.divisions) {
-        availableDivisions = boxData.divisions.map((division) => division.id);
+        availableDivisions = boxData.divisions.map(division => division.id);
       }
       return availableDivisions;
     };
 
-    const isDivisionsDisabled = (boxData, itemId) => selectedDivisions.some(
-      (selectedDivision) => selectedDivision?.id === itemId
-        && boxData
-        && !boxData.allDivisions
-        && boxData.divisions
-        && !boxData.divisions.find((division) => division?.id === itemId),
-    );
+    const isDivisionsDisabled = (boxData, itemId) =>
+      selectedDivisions.some(
+        selectedDivision =>
+          selectedDivision?.id === itemId &&
+          boxData &&
+          !boxData.allDivisions &&
+          boxData.divisions &&
+          !boxData.divisions.find(division => division?.id === itemId),
+      );
 
     return (
       <>
         {sectionTitle && (
           <Checkbox
-            onChange={(e) => this.handleChangeWhoPaysUmpires(e, type, hasSettings)}
+            onChange={e => this.handleChangeWhoPaysUmpires(e, type, hasSettings)}
             checked={!!sectionData?.length}
             className="mx-0 mb-2"
             disabled={disabled}
@@ -949,12 +981,14 @@ class UmpirePaymentSetting extends Component {
                   </div>
                 )}
                 <Checkbox
-                  onChange={(e) => this.handleChangeSettings(
-                    sectionDataIndex,
-                    'allDivisions',
-                    e.target.checked,
-                    sectionData,
-                  )}
+                  onChange={e =>
+                    this.handleChangeSettings(
+                      sectionDataIndex,
+                      'allDivisions',
+                      e.target.checked,
+                      sectionData,
+                    )
+                  }
                   checked={boxData?.allDivisions}
                   disabled={!allowedDivisionList}
                 >
@@ -972,11 +1006,13 @@ class UmpirePaymentSetting extends Component {
                     minWidth: 182,
                     marginTop: 20,
                   }}
-                  onChange={(divisions) => this.handleChangeSettings(sectionDataIndex, 'divisions', divisions, sectionData)}
+                  onChange={divisions =>
+                    this.handleChangeSettings(sectionDataIndex, 'divisions', divisions, sectionData)
+                  }
                   value={getAvailableDivisions(boxData)}
                   disabled={!allowedDivisionList}
                 >
-                  {(allowedDivisionList || []).map((item) => (
+                  {(allowedDivisionList || []).map(item => (
                     <Option
                       key={`compOrgDivision_${item.id}`}
                       disabled={isDivisionsDisabled(boxData, item.id)}
@@ -990,16 +1026,14 @@ class UmpirePaymentSetting extends Component {
                 {hasSettings && this.officialsFeesView(sectionData, sectionDataIndex)}
               </div>
             ))}
-            {!!allowedDivisionList
-              && !!selectedDivisions
-              && selectedDivisions.length < allowedDivisionList.length
-              && hasSettings && (
+            {!!allowedDivisionList &&
+              !!selectedDivisions &&
+              selectedDivisions.length < allowedDivisionList.length &&
+              hasSettings && (
                 <div className="row mb-5 position-absolute">
                   <div className="col-sm" onClick={() => this.handleAddBox(type)}>
                     <span className="input-heading-add-another pointer pt-0">
-                      +
-                      {' '}
-                      {AppConstants.addDivision}
+                      + {AppConstants.addDivision}
                     </span>
                   </div>
                 </div>
@@ -1052,7 +1086,12 @@ class UmpirePaymentSetting extends Component {
                 <div>
                   {umpirePoolData.map((poolDataItem, i) => (
                     <div key={`poolDataItem${i}`}>
-                      {this.umpireFeesRowView('byPool', poolDataItem, sectionData, sectionDataIndex)}
+                      {this.umpireFeesRowView(
+                        'byPool',
+                        poolDataItem,
+                        sectionData,
+                        sectionDataIndex,
+                      )}
                     </div>
                   ))}
                 </div>
@@ -1095,8 +1134,8 @@ class UmpirePaymentSetting extends Component {
     return (
       <div>
         <div className="row">
-          {
-            sequences.map((sequence) => this.rateCellView(
+          {sequences.map(sequence =>
+            this.rateCellView(
               itemRates,
               RegistrationUserRoles.OtherOfficial,
               `${AppConstants.officialStatisticians} ${sequence} rate (inc GST)`,
@@ -1105,12 +1144,12 @@ class UmpirePaymentSetting extends Component {
               radioListKey,
               null,
               sequence,
-            ))
-          }
+            ),
+          )}
         </div>
       </div>
     );
-  }
+  };
 
   umpireFeesRowView = (radioListKey, dataItem, sectionData, sectionDataIndex) => {
     const { competition } = this.state;
@@ -1118,41 +1157,37 @@ class UmpirePaymentSetting extends Component {
 
     const cellLineIdKey = radioListKey === 'byPool' ? 'umpirePoolId' : 'accreditationUmpireRefId';
     const itemRates = sectionData[sectionDataIndex][radioListKey].find(
-      (data) => data[cellLineIdKey] === dataItem.id,
+      data => data[cellLineIdKey] === dataItem.id,
     )?.rates;
 
     return (
       <div>
         <div className="row">
-          {
-            !!dataItem && (
-              <div className="col-sm input-width d-flex align-items-end">
-                <InputWithHead
-                  heading={AppConstants.name}
-                  placeholder="Name"
-                  value={dataItem.description || dataItem.name}
-                  disabled
-                />
-              </div>
-            )
-          }
+          {!!dataItem && (
+            <div className="col-sm input-width d-flex align-items-end">
+              <InputWithHead
+                heading={AppConstants.name}
+                placeholder="Name"
+                value={dataItem.description || dataItem.name}
+                disabled
+              />
+            </div>
+          )}
 
-          {
-            sequences.map((sequence) => {
-              const umpireField = getUmpireField(sequence);
+          {sequences.map(sequence => {
+            const umpireField = getUmpireField(sequence);
 
-              return this.rateCellView(
-                itemRates,
-                umpireField.roleId,
-                umpireField.rateHeading,
-                sectionData,
-                sectionDataIndex,
-                radioListKey,
-                dataItem?.id,
-                sequence,
-              );
-            })
-          }
+            return this.rateCellView(
+              itemRates,
+              umpireField.roleId,
+              umpireField.rateHeading,
+              sectionData,
+              sectionDataIndex,
+              radioListKey,
+              dataItem?.id,
+              sequence,
+            );
+          })}
         </div>
       </div>
     );
@@ -1168,7 +1203,9 @@ class UmpirePaymentSetting extends Component {
     rateLineIndex,
     sequence,
   ) => {
-    const value = (poolItemRates || []).find((rate) => rate.roleId === rateRoleId && rate.sequence === sequence)?.rate;
+    const value = (poolItemRates || []).find(
+      rate => rate.roleId === rateRoleId && rate.sequence === sequence,
+    )?.rate;
 
     return (
       <div className="col-sm input-width d-flex align-items-end">
@@ -1179,15 +1216,17 @@ class UmpirePaymentSetting extends Component {
           precision={2}
           step={0.01}
           heading={heading}
-          onChange={(e) => this.handleChangeRateCell(
-            e,
-            sectionData,
-            sectionDataIndex,
-            radioListKey,
-            rateRoleId,
-            rateLineIndex,
-            sequence,
-          )}
+          onChange={e =>
+            this.handleChangeRateCell(
+              e,
+              sectionData,
+              sectionDataIndex,
+              radioListKey,
+              rateRoleId,
+              rateLineIndex,
+              sequence,
+            )
+          }
           value={value || 0}
         />
       </div>
@@ -1226,9 +1265,10 @@ class UmpirePaymentSetting extends Component {
     const { umpirePoolData } = this.props.umpirePoolAllocationState;
     const { paymentSettingsData } = this.state;
 
-    const someNoPoolSettings = !!paymentSettingsData
-      && paymentSettingsData.some(
-        (settingsItem) => settingsItem.UmpirePaymentFeeType === 'BY_POOL' && !umpirePoolData.length,
+    const someNoPoolSettings =
+      !!paymentSettingsData &&
+      paymentSettingsData.some(
+        settingsItem => settingsItem.UmpirePaymentFeeType === 'BY_POOL' && !umpirePoolData.length,
       );
 
     return (
@@ -1246,12 +1286,12 @@ class UmpirePaymentSetting extends Component {
           type="primary"
           htmlType="submit"
           disabled={
-            someNoPoolSettings
-            || !this.state.selectedComp
-            || this.props.umpireCompetitionState.onLoad
-            || this.props.umpirePaymentSettingState.onLoad
-            || this.props.liveScoreTeamState.onLoad
-            || this.props.umpirePoolAllocationState.onLoad
+            someNoPoolSettings ||
+            !this.state.selectedComp ||
+            this.props.umpireCompetitionState.onLoad ||
+            this.props.umpirePaymentSettingState.onLoad ||
+            this.props.liveScoreTeamState.onLoad ||
+            this.props.umpirePoolAllocationState.onLoad
           }
         >
           {AppConstants.save}
@@ -1263,7 +1303,7 @@ class UmpirePaymentSetting extends Component {
   render() {
     return (
       <div className="fluid-width default-bg">
-        <DashboardLayout menuHeading={AppConstants.umpires} menuName={AppConstants.umpires} />
+        <DashboardLayout menuHeading={AppConstants.officials} menuName={AppConstants.officials} />
         <InnerHorizontalMenu menu="umpire" umpireSelectedKey="9" />
         <Layout>
           <Form onFinish={this.saveAPIsActionCall} noValidate="noValidate">
@@ -1276,10 +1316,10 @@ class UmpirePaymentSetting extends Component {
           </Form>
           <Loader
             visible={
-              this.props.umpireCompetitionState.onLoad
-              || this.props.umpirePaymentSettingState.onLoad
-              || this.props.liveScoreTeamState.onLoad
-              || this.props.umpirePoolAllocationState.onLoad
+              this.props.umpireCompetitionState.onLoad ||
+              this.props.umpirePaymentSettingState.onLoad ||
+              this.props.liveScoreTeamState.onLoad ||
+              this.props.umpirePoolAllocationState.onLoad
             }
           />
         </Layout>

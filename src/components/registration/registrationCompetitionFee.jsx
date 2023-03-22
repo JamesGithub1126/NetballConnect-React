@@ -142,6 +142,7 @@ import CompetitionPaymentTab from './competitionfee/paymentTab';
 import ReactPlayer from 'react-player';
 import { CompetitionDiscountType, DiscountType } from 'util/enums';
 import InputWithHead from '../../customComponents/InputWithHead';
+import getCompetitionPermissions from 'components/competition/helper/getCompetitionPermissions';
 const { Header, Footer, Content } = Layout;
 const { Option } = Select;
 const { TextArea } = Input;
@@ -167,19 +168,6 @@ const restrictionProductTypesTable = [
     width: '25%',
   },
 ];
-
-const permissionObject = {
-  compDetailDisable: false,
-  regInviteesDisable: false,
-  membershipDisable: false,
-  divisionsDisable: false,
-  feesTableDisable: false,
-  paymentsDisable: false,
-  discountsDisable: false,
-  allDisable: false,
-  isPublished: false,
-};
-
 const TabKey = {
   Detail: '1',
   Membership: '2',
@@ -224,7 +212,7 @@ class RegistrationCompetitionFee extends Component {
       logoUrl: '',
       isSetDefaul: false,
       competitionIsUsed: false,
-      isCreatorEdit: false, /// ///// user is owner of the competition than isCreatorEdit will be false
+      isCompCreator: false,
       organisationTypeRefId: 0,
       isPublished: false,
       isRegClosed: false,
@@ -249,7 +237,7 @@ class RegistrationCompetitionFee extends Component {
         { id: 17, value: 17 },
         { id: 18, value: 18 },
       ],
-      permissionState: permissionObject,
+      permissionState: {},
       divisionTable: [
         {
           title: AppConstants.divisionName,
@@ -281,11 +269,7 @@ class RegistrationCompetitionFee extends Component {
                           'divisionName',
                         )
                       }
-                      disabled={
-                        !this.state.isCreatorEdit
-                          ? false
-                          : this.state.permissionState.divisionsDisable
-                      }
+                      disabled={!this.state.permissionState?.division?.enabled}
                     />
                   </div>
                 </Popover>
@@ -310,9 +294,7 @@ class RegistrationCompetitionFee extends Component {
           render: (genderRestriction, record, index) => (
             <Checkbox
               className="single-checkbox mt-1"
-              disabled={
-                !this.state.isCreatorEdit ? false : this.state.permissionState.divisionsDisable
-              }
+              disabled={!this.state.permissionState?.division?.enabled}
               checked={genderRestriction}
               onChange={e =>
                 this.divisionTableDataOnchange(e.target.checked, record, index, 'genderRestriction')
@@ -345,11 +327,7 @@ class RegistrationCompetitionFee extends Component {
                     }
                     value={genderRefId}
                     placeholder="Select"
-                    disabled={
-                      !this.state.isCreatorEdit
-                        ? false
-                        : this.state.permissionState.divisionsDisable
-                    }
+                    disabled={!this.state.permissionState?.division?.enabled}
                   >
                     {this.props.commonReducerState.genderDataEnum.map(item => (
                       <Option key={'gender_' + item.id} value={item.id}>
@@ -383,9 +361,7 @@ class RegistrationCompetitionFee extends Component {
               onChange={e =>
                 this.divisionTableDataOnchange(e.target.checked, record, index, 'ageRestriction')
               }
-              disabled={
-                !this.state.isCreatorEdit ? false : this.state.permissionState.divisionsDisable
-              }
+              disabled={!this.state.permissionState?.division?.enabled}
             />
           ),
         },
@@ -424,9 +400,9 @@ class RegistrationCompetitionFee extends Component {
                   showTime={false}
                   disabled={
                     !record.ageRestriction ||
-                    (!this.state.isCreatorEdit
+                    (this.state.isCompCreator
                       ? false
-                      : this.state.permissionState.divisionsDisable)
+                      : !this.state.permissionState?.division?.enabled)
                   }
                   value={fromDate !== null && moment(fromDate)}
                   disabledDate={d => !d || d.isSameOrAfter(record.toDate)}
@@ -469,10 +445,7 @@ class RegistrationCompetitionFee extends Component {
                   format="DD-MM-YYYY"
                   showTime={false}
                   disabled={
-                    !record.ageRestriction ||
-                    (!this.state.isCreatorEdit
-                      ? false
-                      : this.state.permissionState.divisionsDisable)
+                    !record.ageRestriction || !this.state.permissionState?.division?.enabled
                   }
                   value={toDate !== null && moment(toDate)}
                   // disabledDate={d => !d || d.isSameOrBefore(record.fromDate)}
@@ -486,26 +459,25 @@ class RegistrationCompetitionFee extends Component {
           title: '',
           dataIndex: 'clear',
           key: 'clear',
-          render: (clear, record, index) => (
-            <span
-              className="d-flex justify-content-center w-100"
-              role="button"
-              style={{ cursor: 'pointer' }}
-            >
-              <img
-                className="dot-image"
-                src={AppImages.redCross}
-                alt=""
-                width="16"
-                height="16"
-                onClick={() =>
-                  !this.state.permissionState.divisionsDisable
-                    ? this.addRemoveDivision(index, record, 'remove')
-                    : null
-                }
-              />
-            </span>
-          ),
+          render: (clear, record, index) => {
+            const deleteEnabled = this.state.permissionState?.division?.delete?.enabled;
+            return deleteEnabled ? (
+              <span
+                className="d-flex justify-content-center w-100"
+                role="button"
+                style={{ cursor: 'pointer' }}
+              >
+                <img
+                  className="dot-image"
+                  src={AppImages.redCross}
+                  alt=""
+                  width="16"
+                  height="16"
+                  onClick={() => this.addRemoveDivision(index, record, 'remove')}
+                />
+              </span>
+            ) : null;
+          },
         },
       ],
       divisionState: false,
@@ -538,6 +510,11 @@ class RegistrationCompetitionFee extends Component {
     this.formRef = createRef();
     // this.tableReference = React.createRef();
   }
+
+  checkIsNewComp = () => {
+    const { isNewComp } = this.props.location.state ?? { isNewComp: false };
+    return isNewComp;
+  };
 
   componentDidUpdate(prevProps) {
     let competitionFeesState = this.props.competitionFeesState;
@@ -572,6 +549,7 @@ class RegistrationCompetitionFee extends Component {
     }
 
     if (prevProps.competitionFeesState !== competitionFeesState) {
+      const { competitionUniqueKey, hasRegistration } = competitionFeesState.competitionDetailData;
       if (competitionFeesState.getCompAllDataOnLoad === false && this.state.getDataLoading) {
         let registrationInviteesRefId = 7;
         let inviteeArray = competitionFeesState.competitionDetailData.invitees;
@@ -597,18 +575,28 @@ class RegistrationCompetitionFee extends Component {
         let orgData = getOrganisationData() ? getOrganisationData() : null;
         let organisationUniqueKey = orgData ? orgData.organisationUniqueKey : 0;
         // let userId = getUserId();
-        let isCreatorEdit = !(creatorId == organisationUniqueKey);
-
-        this.setPermissionFields(isPublished, isRegClosed, isCreatorEdit);
-        let competitionTabKey = isCreatorEdit ? TabKey.Fee : this.state.competitionTabKey;
+        let isCompCreator = creatorId == organisationUniqueKey;
+        const isNewComp = this.checkIsNewComp();
+        const permissions = getCompetitionPermissions(
+          isNewComp,
+          competitionUniqueKey,
+          hasRegistration,
+          isPublished,
+          false, //draws status doesn't matter for this page, so don't restrict based on it
+          isCompCreator,
+          isRegClosed,
+          true,
+        );
+        let competitionTabKey = !isCompCreator ? TabKey.Fee : this.state.competitionTabKey;
         this.setState({
           getDataLoading: false,
           profileImage: competitionFeesState.competitionDetailData.competitionLogoUrl,
           competitionIsUsed: competitionFeesState.competitionDetailData.isUsed,
           isPublished,
           isRegClosed,
-          isCreatorEdit,
+          isCompCreator,
           competitionTabKey,
+          permissionState: permissions,
         });
         this.setDetailsFieldValue();
         this.checkShowMultiDivisionRegistration();
@@ -710,90 +698,6 @@ class RegistrationCompetitionFee extends Component {
     });
   };
 
-  ////disable or enable particular fields
-  setPermissionFields = (isPublished, isRegClosed, isCreatorEdit) => {
-    if (isPublished) {
-      if (isRegClosed) {
-        let permissionObject = {
-          compDetailDisable: true,
-          regInviteesDisable: true,
-          membershipDisable: true,
-          divisionsDisable: true,
-          feesTableDisable: !isCreatorEdit ? false : true,
-          paymentsDisable: true,
-          discountsDisable: true,
-
-          voucherDisable: true,
-
-          allDisable: false,
-          isPublished: true,
-          compDatesDisable: !isCreatorEdit ? false : true,
-        };
-        this.setState({ permissionState: permissionObject });
-        return;
-      }
-      if (isCreatorEdit) {
-        let permissionObject = this.getAffiliatePermission();
-        this.setState({ permissionState: permissionObject });
-      } else {
-        let permissionObject = {
-          compDetailDisable: false,
-          regInviteesDisable: true,
-          membershipDisable: true,
-          divisionsDisable: true,
-          feesTableDisable: true,
-          paymentsDisable: false,
-          discountsDisable: false,
-
-          voucherDisable: false,
-
-          allDisable: false,
-          isPublished: true,
-          compDatesDisable: false,
-        };
-        this.setState({ permissionState: permissionObject });
-      }
-    } else {
-      let permissionObject = {
-        compDetailDisable: false,
-        regInviteesDisable: false,
-        membershipDisable: false,
-        divisionsDisable: false,
-        feesTableDisable: false,
-        paymentsDisable: false,
-        discountsDisable: false,
-
-        voucherDisable: false,
-
-        allDisable: false,
-        isPublished: false,
-        compDatesDisable: false,
-      };
-      if (isCreatorEdit) {
-        permissionObject = this.getAffiliatePermission();
-      }
-      this.setState({ permissionState: permissionObject });
-    }
-  };
-  getAffiliatePermission() {
-    let permissionObject = {
-      compDetailDisable: true,
-      regInviteesDisable: true,
-      membershipDisable: true,
-      divisionsDisable: true,
-      feesTableDisable: true,
-      paymentsDisable: true,
-      discountsDisable: false,
-
-      voucherDisable: true,
-
-      allDisable: false,
-      isPublished: true,
-      compDatesDisable: true,
-    };
-    return permissionObject;
-  }
-
   componentDidMount() {
     let orgData = getOrganisationData() ? getOrganisationData() : null;
     let competitionId = this.props.location.state ? this.props.location.state.id : null;
@@ -801,10 +705,15 @@ class RegistrationCompetitionFee extends Component {
       ? this.props.location.state.affiliateOrgId
       : null;
     let currentOrganisationId = orgData ? orgData.organisationId : 0;
+    const isNewComp = this.checkIsNewComp();
+    const permissions = getCompetitionPermissions(isNewComp); //disable fields on initial page load
+    
     this.setState({
       organisationTypeRefId: orgData.organisationTypeRefId,
       affiliateOrgId,
       currentOrganisationId: currentOrganisationId,
+      permissionState: permissions,
+      isCompCreator: isNewComp,
     });
     this.apiCalls(competitionId, orgData.organisationUniqueKey, affiliateOrgId);
     this.setDetailsFieldValue();
@@ -908,7 +817,7 @@ class RegistrationCompetitionFee extends Component {
       x => x.isSeasonal && x.individualChargeTypeRefId == IndividualChargeType.PerMatch,
     );
     selectedCasualPaymentArr = selectedCasualPaymentArr.filter(x => x.isChecked && isCasual);
-    let isAffiliate = this.state.isCreatorEdit;
+    let isAffiliate = !this.state.isCompCreator;
     SelectedSeasonalPaymentArr = SelectedSeasonalPaymentArr.filter(
       x =>
         (x.isChecked ||
@@ -1949,8 +1858,7 @@ class RegistrationCompetitionFee extends Component {
       let competitionId = compFeesState.competitionId;
       let postData = compFeesState.competitionDetailData;
 
-      let membershipDisable = this.state.permissionState.membershipDisable;
-      let divisionsDisable = this.state.permissionState.divisionsDisable;
+      const membershipEnabled = this.state.permissionState?.membership?.enabled;
 
       let nonPlayingDate = JSON.stringify(postData.nonPlayingDates);
       let venue = JSON.stringify(compFeesState.postVenues);
@@ -1971,7 +1879,7 @@ class RegistrationCompetitionFee extends Component {
       } else if (anyOrgAffiliateArr != null && anyOrgAffiliateArr.length > 0) {
         invitees = anyOrgAffiliateArr;
       }
-      if (tabKey == TabKey.Detail && this.state.isCreatorEdit == false) {
+      if (tabKey == TabKey.Detail && this.state.isCompCreator == true) {
         this.saveCompDetailsApicall(
           competitionId,
           postData,
@@ -1980,17 +1888,13 @@ class RegistrationCompetitionFee extends Component {
           nonPlayingDate,
           venue,
         );
-      } else if (
-        tabKey == TabKey.Membership &&
-        this.state.isCreatorEdit == false &&
-        membershipDisable == false
-      ) {
+      } else if (tabKey == TabKey.Membership && this.state.isCompCreator && membershipEnabled) {
         this.saveCompMembershipApiCall(competitionId);
-      } else if (tabKey == TabKey.Division && this.state.isCreatorEdit == false) {
+      } else if (tabKey == TabKey.Division && this.state.isCompCreator) {
         this.saveCompDivApiCall(competitionId, postData, compFeesState);
       } else if (tabKey == TabKey.Fee) {
         this.saveCompFeesApiCall();
-      } else if (tabKey == TabKey.Payment && this.state.isCreatorEdit == false) {
+      } else if (tabKey == TabKey.Payment && this.state.isCompCreator) {
         this.paymentApiCall(competitionId);
       } else if (tabKey == TabKey.Discount) {
         this.discountApiCall(competitionId);
@@ -2212,7 +2116,7 @@ class RegistrationCompetitionFee extends Component {
 
   // Non playing dates view
   nonPlayingDateView(item, index) {
-    let compDetailDisable = this.state.permissionState.compDetailDisable;
+    const compDetailDisabled = !this.state.permissionState?.compDetails?.enabled;
     return (
       <div className="fluid-width mt-3">
         <div className="row">
@@ -2222,7 +2126,7 @@ class RegistrationCompetitionFee extends Component {
               placeholder={AppConstants.name}
               value={item.name}
               onChange={e => this.updateNonPlayingNames(e.target.value, index, 'name')}
-              disabled={compDetailDisable}
+              disabled={compDetailDisabled}
               data-testid={AppUniqueId.ADD_NON_PLAYING_DATE.concat(`${index}`)}
             />
           </div>
@@ -2235,13 +2139,13 @@ class RegistrationCompetitionFee extends Component {
               format="DD-MM-YYYY"
               showTime={false}
               value={item.nonPlayingDate && moment(item.nonPlayingDate, 'YYYY-MM-DD')}
-              disabled={compDetailDisable}
+              disabled={compDetailDisabled}
             />
           </div>
           <div
             className="col-sm-2 transfer-image-view"
             onClick={() =>
-              !compDetailDisable
+              !compDetailDisabled
                 ? this.props.add_editcompetitionFeeDeatils(index, 'nonPlayingDataRemove')
                 : null
             }
@@ -2328,12 +2232,10 @@ class RegistrationCompetitionFee extends Component {
     let appState = this.props.appState;
     let detailsData = this.props.competitionFeesState;
     let defaultCompFeesOrgLogo = detailsData.defaultCompFeesOrgLogo;
-    let compDetailDisable = this.state.permissionState.compDetailDisable;
-    let compDatesDisable = this.state.permissionState.compDatesDisable;
-    let isPublished = this.state.permissionState.isPublished;
+    const compDetailDisabled = !this.state.permissionState?.compDetails?.enabled;
     let venueList = appState.venueList;
     const { affiliateOurOrg } = this.props.userState;
-    if (compDetailDisable) {
+    if (compDetailDisabled) {
       venueList = detailsData.venueList;
     }
     return (
@@ -2354,7 +2256,7 @@ class RegistrationCompetitionFee extends Component {
             data-testid={AppUniqueId.SELECT_COMPETITION_YEAR}
             style={{ maxWidth: 80 }}
             onChange={e => this.setYear(e)}
-            disabled={isPublished}
+            disabled={compDetailDisabled}
           >
             {this.props.appState.yearList.map(item => (
               <Option
@@ -2390,7 +2292,7 @@ class RegistrationCompetitionFee extends Component {
                 'competitionName',
               )
             }
-            disabled={compDetailDisable}
+            disabled={compDetailDisabled}
             onBlur={i =>
               this.formRef.current.setFieldsValue({
                 competition_name: captializedString(i.target.value),
@@ -2425,7 +2327,7 @@ class RegistrationCompetitionFee extends Component {
                 </label>
               </div>
               <input
-                disabled={compDetailDisable}
+                disabled={compDetailDisabled}
                 type="file"
                 id="user-pic"
                 className="d-none"
@@ -2444,7 +2346,7 @@ class RegistrationCompetitionFee extends Component {
                   // defaultChecked={false}
                   checked={detailsData.competitionDetailData.logoIsDefault}
                   onChange={e => this.logoIsDefaultOnchange(e.target.checked, 'logoIsDefault')}
-                  disabled={compDetailDisable}
+                  disabled={compDetailDisabled}
                 >
                   {AppConstants.useDefault}
                 </Checkbox>
@@ -2456,7 +2358,7 @@ class RegistrationCompetitionFee extends Component {
                   data-testid={AppUniqueId.USE_DEFAULT_COMP_LOGO}
                   checked={this.state.logoSetDefault}
                   onChange={e => this.logoSaveAsDefaultOnchange(e.target.checked, 'logoIsDefault')}
-                  disabled={compDetailDisable}
+                  disabled={compDetailDisabled}
                 >
                   {AppConstants.useAffiliateLogo}
                 </Checkbox>
@@ -2496,7 +2398,7 @@ class RegistrationCompetitionFee extends Component {
               alt=""
             />
             <input
-              disabled={compDetailDisable}
+              disabled={compDetailDisabled}
               type="file"
               id="hero-pic"
               className="d-none"
@@ -2532,7 +2434,7 @@ class RegistrationCompetitionFee extends Component {
           allowClear
           value={detailsData.competitionDetailData.description}
           onChange={e => this.props.add_editcompetitionFeeDeatils(e.target.value, 'description')}
-          disabled={compDetailDisable}
+          disabled={compDetailDisabled}
         />
 
         <div style={{ marginTop: 15 }}>
@@ -2560,7 +2462,7 @@ class RegistrationCompetitionFee extends Component {
               onSearch={value => {
                 this.handleSearch(value, appState.mainVenueList);
               }}
-              disabled={compDetailDisable}
+              disabled={compDetailDisabled}
             >
               {venueList.map(item => (
                 <Option
@@ -2574,7 +2476,7 @@ class RegistrationCompetitionFee extends Component {
             </Select>
           </Form.Item>
         </div>
-        {compDetailDisable == false &&
+        {!compDetailDisabled &&
           affiliateOurOrg.organisationTypeRefId <=
             affiliateOurOrg.whatIsTheLowestOrgThatCanAddVenue && (
             <NavLink
@@ -2609,7 +2511,7 @@ class RegistrationCompetitionFee extends Component {
               this.props.add_editcompetitionFeeDeatils(e.target.value, 'competitionTypeRefId')
             }
             value={detailsData.competitionTypeRefId}
-            disabled={compDetailDisable}
+            disabled={compDetailDisabled}
           >
             {appState.typesOfCompetition.map(item => (
               <Radio
@@ -2643,7 +2545,7 @@ class RegistrationCompetitionFee extends Component {
               this.props.add_editcompetitionFeeDeatils(e.target.value, 'competitionFormatRefId')
             }
             value={detailsData.competitionFormatRefId}
-            disabled={compDetailDisable}
+            disabled={compDetailDisabled}
           >
             {appState.competitionFormatTypes.map(item => (
               <div key={'competitionFormatT' + item.id} className="contextualHelp-RowDirection">
@@ -2688,7 +2590,7 @@ class RegistrationCompetitionFee extends Component {
                   format="DD-MM-YYYY"
                   showTime={false}
                   // value={detailsData.competitionDetailData.startDate && moment(detailsData.competitionDetailData.startDate, "YYYY-MM-DD")}
-                  disabled={compDatesDisable}
+                  disabled={compDetailDisabled}
                 />
               </Form.Item>
             </div>
@@ -2712,7 +2614,7 @@ class RegistrationCompetitionFee extends Component {
                   format="DD-MM-YYYY"
                   showTime={false}
                   disabledDate={d => !d || d.isBefore(detailsData.competitionDetailData.startDate)}
-                  disabled={compDatesDisable}
+                  disabled={compDetailDisabled}
                 />
               </Form.Item>
             </div>
@@ -2738,7 +2640,7 @@ class RegistrationCompetitionFee extends Component {
                 min={1}
                 max={50}
                 value={detailsData.competitionDetailData.noOfRounds}
-                disabled={compDetailDisable}
+                disabled={compDetailDisabled}
               />
             </Form.Item>
           </div>
@@ -2756,7 +2658,7 @@ class RegistrationCompetitionFee extends Component {
                 onChange={e =>
                   this.props.add_editcompetitionFeeDeatils(e.target.value, 'roundInDays')
                 }
-                disabled={compDetailDisable}
+                disabled={compDetailDisabled}
                 heading={AppConstants._days}
                 required={'pt-0'}
               />
@@ -2769,7 +2671,7 @@ class RegistrationCompetitionFee extends Component {
                 onChange={e =>
                   this.props.add_editcompetitionFeeDeatils(e.target.value, 'roundInHours')
                 }
-                disabled={compDetailDisable}
+                disabled={compDetailDisabled}
                 heading={AppConstants._hours}
                 required={'pt-0'}
               />
@@ -2782,7 +2684,7 @@ class RegistrationCompetitionFee extends Component {
                 onChange={e =>
                   this.props.add_editcompetitionFeeDeatils(e.target.value, 'roundInMins')
                 }
-                disabled={compDetailDisable}
+                disabled={compDetailDisabled}
                 heading={AppConstants._minutes}
                 required={'pt-0'}
               />
@@ -2808,7 +2710,7 @@ class RegistrationCompetitionFee extends Component {
             name={'registrationCloseDate'}
             format="DD-MM-YYYY"
             showTime={false}
-            disabled={compDatesDisable}
+            disabled={compDetailDisabled}
           />
         </Form.Item>
 
@@ -2818,15 +2720,17 @@ class RegistrationCompetitionFee extends Component {
             detailsData.competitionDetailData.nonPlayingDates.map((item, index) =>
               this.nonPlayingDateView(item, index),
             )}
-          <a>
-            <span
-              onClick={() => (!compDetailDisable ? this.addNonPlayingDate() : null)}
-              className="input-heading-add-another"
-              data-testid={AppUniqueId.ADD_NON_PLAYING_DATE}
-            >
-              + {AppConstants.addAnotherNonPlayingDate}
-            </span>
-          </a>
+          {compDetailDisabled ? null : (
+            <a>
+              <span
+                onClick={() => this.addNonPlayingDate() }
+                className="input-heading-add-another"
+                data-testid={AppUniqueId.ADD_NON_PLAYING_DATE}
+              >
+                + {AppConstants.addAnotherNonPlayingDate}
+              </span>
+            </a>
+          )}
         </div>
 
         <InputWithHead heading={AppConstants.playerInEachTeam} />
@@ -2843,7 +2747,7 @@ class RegistrationCompetitionFee extends Component {
                 }
                 onChange={e => this.updateMaximumPlayers(e.target.value)}
                 data-testid={AppUniqueId.MAXIMUM_PLAYERS}
-                disabled={compDetailDisable}
+                disabled={compDetailDisabled}
               />
             </div>
           </div>
@@ -2854,7 +2758,7 @@ class RegistrationCompetitionFee extends Component {
         <div>
           <InputWithHead heading={AppConstants.playerPublishLabel} />
           <Radio.Group
-            disabled={compDetailDisable}
+            disabled={compDetailDisabled}
             onChange={e =>
               this.props.add_editcompetitionFeeDeatils(e.target.value, 'playerPublishTypeRefId')
             }
@@ -2893,7 +2797,7 @@ class RegistrationCompetitionFee extends Component {
       }
       membershipProductArray = membershipProductData;
     }
-    let membershipDisable = this.state.permissionState.membershipDisable;
+    const membershipDisabled = !this.state.permissionState?.membership?.enabled;
     return (
       <div className="fees-view pt-5">
         <span className="form-heading required-field">{AppConstants.membershipProduct}</span>
@@ -2911,7 +2815,7 @@ class RegistrationCompetitionFee extends Component {
                 )
               }
               key={index}
-              disabled={membershipDisable}
+              disabled={membershipDisabled}
             >
               {item.membershipProductName}
             </Checkbox>
@@ -2923,7 +2827,7 @@ class RegistrationCompetitionFee extends Component {
 
   membershipTypeInnerView = (item, index) => {
     let typeData = isArrayNotEmpty(item.membershipProductTypes) ? item.membershipProductTypes : [];
-    let membershipDisable = this.state.permissionState.membershipDisable;
+    const membershipDisabled = !this.state.permissionState?.membership?.enabled;
     return (
       <div>
         {typeData.map((typeItem, typeIndex) => (
@@ -2934,7 +2838,7 @@ class RegistrationCompetitionFee extends Component {
               checked={typeItem.isTypeSelected}
               onChange={e => this.membershipTypeSelected(e.target.checked, index, typeIndex)}
               key={typeIndex}
-              disabled={membershipDisable}
+              disabled={membershipDisabled}
             >
               {typeItem.membershipProductTypeName}
             </Checkbox>
@@ -2998,7 +2902,7 @@ class RegistrationCompetitionFee extends Component {
   divisionsView = () => {
     let divisionData = this.props.competitionFeesState.competitionDivisionsData;
     let divisionArray = divisionData !== null ? divisionData : [];
-    let divisionsDisable = this.state.permissionState.divisionsDisable;
+    const divisionsDisabled = !this.state.permissionState?.division?.enabled;
     let restrictionTypeMeta = this.props.commonReducerState.registrationTypeData;
     let detailsData = this.props.competitionFeesState.competitionDetailData;
     let membershipProductData = this.props.competitionFeesState.defaultCompFeesMembershipProduct;
@@ -3048,17 +2952,20 @@ class RegistrationCompetitionFee extends Component {
                       scroll={{ x: 'calc(100%)' }}
                     />
                   </div>
-                  <a>
-                    <span
-                      className="input-heading-add-another"
-                      data-testid={AppUniqueId.ADD_REGISTRATION_DIVISIONS}
-                      onClick={() =>
-                        !divisionsDisable ? this.addRemoveDivision(index, item, 'add') : null
-                      }
-                    >
-                      + {AppConstants.addRegDivision}
-                    </span>
-                  </a>
+
+                  {divisionsDisabled ? null : (
+                    <a>
+                      <span
+                        className="input-heading-add-another"
+                        data-testid={AppUniqueId.ADD_REGISTRATION_DIVISIONS}
+                        onClick={() =>
+                          !divisionsDisabled ? this.addRemoveDivision(index, item, 'add') : null
+                        }
+                      >
+                        + {AppConstants.addRegDivision}
+                      </span>
+                    </a>
+                  )}
                 </div>
               ) : (
                 <span className="applicable-to-heading pt-0 pl-2">
@@ -3074,7 +2981,7 @@ class RegistrationCompetitionFee extends Component {
             <span className="form-heading pl-2">{AppConstants.CompetitionRegistration}</span>
             <Radio.Group
               className="reg-competition-radio"
-              disabled={!this.state.isCreatorEdit ? false : divisionsDisable}
+              disabled={this.state.isCompCreator ? false : divisionsDisabled}
               onChange={e =>
                 this.props.add_editcompetitionFeeDeatils(
                   e.target.value,
@@ -3168,7 +3075,7 @@ class RegistrationCompetitionFee extends Component {
   //     let seletedInvitee = detailsData.selectedInvitees.find(x => x);
   //     let associationAffilites = detailsData.associationAffilites
   //     let clubAffilites = detailsData.clubAffilites
-  //     let regInviteesDisable = this.state.permissionState.regInviteesDisable
+  //     let inviteesDisabled = this.state.permissionState.inviteesDisabled
   //     if (subItem.id == 7 && seletedInvitee == 7) {
   //         return (
   //             <div>
@@ -3185,7 +3092,7 @@ class RegistrationCompetitionFee extends Component {
   //                     onSearch={(value) => {
   //                         this.onInviteeSearch(value, 3)
   //                     }}
-  //                     disabled={regInviteesDisable}
+  //                     disabled={inviteesDisabled}
   //                     showSearch
   //                     onBlur={() => this.onInviteeSearch("", 3)}
   //                     // loading={detailsData.searchLoad}
@@ -3216,7 +3123,7 @@ class RegistrationCompetitionFee extends Component {
   //                     onSearch={(value) => {
   //                         this.onInviteeSearch(value, 4)
   //                     }}
-  //                     disabled={regInviteesDisable}
+  //                     disabled={inviteesDisabled}
   //                     onBlur={() => this.onInviteeSearch("", 4)}
   //                     // loading={detailsData.searchLoad}
   //                 >
@@ -3236,14 +3143,14 @@ class RegistrationCompetitionFee extends Component {
   //     let detailsData = this.props.competitionFeesState
   //     let seletedInvitee = detailsData.selectedInvitees.find(x => x);
   //     let orgLevelId = JSON.stringify(this.state.organisationTypeRefId)
-  //     let regInviteesDisable = this.state.permissionState.regInviteesDisable
+  //     let inviteesDisabled = this.state.permissionState.inviteesDisabled
   //     return (
   //         <div className="fees-view pt-5">
   //             <span className="form-heading required-field">{AppConstants.registrationInvitees}</span>
   //             <div>
   //                 <Radio.Group
   //                     className="reg-competition-radio"
-  //                     disabled={regInviteesDisable}
+  //                     disabled={inviteesDisabled}
   //                     onChange={(e) => this.onInviteesChange(e.target.value)}
   //                     value={seletedInvitee}
   //                 >
@@ -3281,7 +3188,7 @@ class RegistrationCompetitionFee extends Component {
     let clubAffilites = detailsData.clubAffilites;
     const { associationLeague, clubSchool, associationChecked, clubChecked } =
       this.props.competitionFeesState;
-    let regInviteesDisable = this.state.permissionState.regInviteesDisable;
+    const inviteesDisabled = !this.state.permissionState?.compDetails?.invitees?.enabled;
 
     if (subItem?.id == 7 && associationChecked) {
       return (
@@ -3299,7 +3206,7 @@ class RegistrationCompetitionFee extends Component {
             onSearch={value => {
               this.onInviteeSearch(value, 3);
             }}
-            disabled={regInviteesDisable}
+            disabled={inviteesDisabled}
             showSearch
             onBlur={() =>
               isArrayNotEmpty(associationAffilites) == false ? this.onInviteeSearch('', 3) : null
@@ -3334,7 +3241,7 @@ class RegistrationCompetitionFee extends Component {
             onSearch={value => {
               this.onInviteeSearch(value, 4);
             }}
-            disabled={regInviteesDisable}
+            disabled={inviteesDisabled}
             // onBlur={() => this.onInviteeSearch('', 4)}
             onBlur={() =>
               isArrayNotEmpty(clubAffilites) == false ? this.onInviteeSearch('', 4) : null
@@ -3420,8 +3327,8 @@ class RegistrationCompetitionFee extends Component {
       competitionDetailData,
     } = this.props.competitionFeesState;
     let orgLevelId = JSON.stringify(this.state.organisationTypeRefId);
-    let regInviteesDisable = this.state.permissionState.regInviteesDisable;
-    let isAffiliateEdit = this.state.isCreatorEdit;
+    const inviteesDisabled = !this.state.permissionState?.compDetails?.invitees?.enabled;
+    let isAffiliateEdit = !this.state.isCompCreator;
     return (
       <div className="fees-view pt-5">
         <div className="contextualHelp-RowDirection">
@@ -3444,7 +3351,7 @@ class RegistrationCompetitionFee extends Component {
             onChange={e =>
               this.props.add_editcompetitionFeeDeatils(e.target.value, 'affiliateSelected')
             }
-            disabled={regInviteesDisable}
+            disabled={inviteesDisabled}
             value={affiliateSelected}
           >
             {(invitees || []).map(
@@ -3504,7 +3411,7 @@ class RegistrationCompetitionFee extends Component {
                                         'affiliateNonSelected',
                                       )
                                     }
-                                    disabled={regInviteesDisable}
+                                    disabled={inviteesDisabled}
                                     value={affiliateNonSelected}
                                   >
                                     <Radio
@@ -3534,7 +3441,7 @@ class RegistrationCompetitionFee extends Component {
               this.props.add_editcompetitionFeeDeatils(e.target.value, 'anyOrgSelected')
             }
             value={anyOrgSelected}
-            disabled={regInviteesDisable}
+            disabled={inviteesDisabled}
           >
             {(invitees || []).map(
               (item, index) =>
@@ -3564,7 +3471,7 @@ class RegistrationCompetitionFee extends Component {
                                             ))} */}
                         <div className="d-flex flex-column" style={{ paddingLeft: 20 }}>
                           <Checkbox
-                            disabled={regInviteesDisable}
+                            disabled={inviteesDisabled}
                             className="single-checkbox-radio-style"
                             style={{ paddingTop: 8 }}
                             checked={associationChecked}
@@ -3582,7 +3489,7 @@ class RegistrationCompetitionFee extends Component {
                           {this.affiliatesSearchInvitee(item.subReferences[0], anyOrgSelected)}
 
                           <Checkbox
-                            disabled={regInviteesDisable}
+                            disabled={inviteesDisabled}
                             className="single-checkbox-radio-style ml-0"
                             style={{ paddingTop: 13 }}
                             checked={clubChecked}
@@ -3609,7 +3516,7 @@ class RegistrationCompetitionFee extends Component {
                               )
                             }
                             value={anyOrgNonSelected}
-                            disabled={regInviteesDisable}
+                            disabled={inviteesDisabled}
                           >
                             <Radio key="none2" value="none2" data-testid={AppUniqueId.ORG_NONE}>
                               None
@@ -3628,7 +3535,7 @@ class RegistrationCompetitionFee extends Component {
             onChange={e =>
               this.props.add_editcompetitionFeeDeatils(e.target.value, 'otherSelected')
             }
-            disabled={regInviteesDisable}
+            disabled={inviteesDisabled}
             value={otherSelected}
           >
             {(invitees || []).map(
@@ -3657,7 +3564,7 @@ class RegistrationCompetitionFee extends Component {
                         {item.subReferences.map(subItem => (
                           <div key={subItem.id} style={{ marginLeft: 20 }}>
                             <Radio
-                              disabled={regInviteesDisable}
+                              disabled={inviteesDisabled}
                               onChange={e =>
                                 this.props.add_editcompetitionFeeDeatils(e.target.value, 'none')
                               }
@@ -3692,7 +3599,7 @@ class RegistrationCompetitionFee extends Component {
   charityVoucherView = () => {
     let charityRoundUp = this.props.competitionFeesState.charityRoundUp;
     // let paymentData = this.props.competitionFeesState.competitionPaymentsData;
-    let paymentsDisable = this.state.permissionState.paymentsDisable;
+    const paymentsDisabled = !this.state.permissionState.payments.enabled;
     let checkCharityArray = this.props.competitionFeesState.competitionPaymentsData.charityRoundUp;
     return (
       <div className="advanced-setting-view pt-5">
@@ -3712,7 +3619,7 @@ class RegistrationCompetitionFee extends Component {
                   className="single-checkbox mt-3"
                   checked={item.isSelected}
                   onChange={e => this.onChangeCharity(e.target.checked, index, 'charityRoundUp')}
-                  disabled={paymentsDisable}
+                  disabled={paymentsDisabled}
                 >
                   {item.description}
                 </Checkbox>
@@ -3737,7 +3644,7 @@ class RegistrationCompetitionFee extends Component {
                 heading={AppConstants.title}
                 placeholder={AppConstants.title}
                 // value={charityTitle}
-                disabled={paymentsDisable}
+                disabled={paymentsDisabled}
                 onChange={e =>
                   this.props.updatePaymentOption(captializedString(e.target.value), null, 'title')
                 }
@@ -3763,7 +3670,7 @@ class RegistrationCompetitionFee extends Component {
                 allowClear
                 // value={charityDescription}
                 onChange={e => this.props.updatePaymentOption(e.target.value, null, 'description')}
-                disabled={paymentsDisable}
+                disabled={paymentsDisabled}
               />
             </Form.Item>
           </div>
@@ -3789,8 +3696,7 @@ class RegistrationCompetitionFee extends Component {
   ////government voucher view
   voucherView = () => {
     let govtVoucher = this.props.competitionFeesState.govtVoucher;
-    // let discountDisable = this.state.permissionState.discountsDisable;
-    let voucherDisable = this.state.permissionState.voucherDisable;
+    const voucherDisabled = !this.state.permissionState?.discounts?.voucher?.enabled;
     return (
       <div className="advanced-setting-view pt-5">
         <span className="form-heading">{AppConstants.governmentVouchers}</span>
@@ -3805,7 +3711,7 @@ class RegistrationCompetitionFee extends Component {
                 onChange={e =>
                   this.onChangeGovtVoucher(e.target.checked, index, 'govermentVouchers')
                 }
-                disabled={voucherDisable}
+                disabled={voucherDisabled}
               >
                 {item.description}
               </Checkbox>
@@ -3858,7 +3764,6 @@ class RegistrationCompetitionFee extends Component {
   discountViewChange = (item, index) => {
     let childDiscounts =
       item.childDiscounts !== null && item.childDiscounts.length > 0 ? item.childDiscounts : [];
-    // let discountsDisable = this.state.permissionState.discountsDisable
     switch (item.competitionTypeDiscountTypeRefId) {
       case 1:
         return (
@@ -4382,10 +4287,10 @@ class RegistrationCompetitionFee extends Component {
 
   ////to check discount fields would be enable or disable
   checkDiscountDisable = organisationId => {
-    let discountsDisable = this.state.permissionState.discountsDisable;
+    const discountsDisabled = !this.state.permissionState?.discounts?.enabled;
     let orgData = getOrganisationData() ? getOrganisationData() : null;
     let currentOrganisationId = orgData ? orgData.organisationId : 0;
-    if (discountsDisable == false) {
+    if (!discountsDisabled) {
       if (currentOrganisationId == organisationId) {
         return false;
       } else {
@@ -4405,10 +4310,9 @@ class RegistrationCompetitionFee extends Component {
       this.props.competitionFeesState.competitionMembershipProductData !== null
         ? this.props.competitionFeesState.competitionMembershipProductData
         : [];
-    let discountsDisable = this.state.permissionState.discountsDisable;
     let feesData = this.props.competitionFeesState.competitionFeesData;
     let hasNegativeFee = checkHasNegativeFee(feesData);
-    discountsDisable = discountsDisable || hasNegativeFee;
+    const discountsDisabled = !this.state.permissionState?.discounts?.enabled || hasNegativeFee;
     const getIsFamily = index => {
       const isFamilyDiscount =
         discountData[index]?.competitionTypeDiscountTypeRefId === CompetitionDiscountType.Family;
@@ -4568,8 +4472,8 @@ class RegistrationCompetitionFee extends Component {
         ))}
 
         <span
-          className={'input-heading-add-another ' + (discountsDisable ? 'disabled' : '')}
-          onClick={() => (!discountsDisable ? this.addRemoveDiscount('add', -1) : null)}
+          className={'input-heading-add-another ' + (discountsDisabled ? 'disabled' : '')}
+          onClick={() => (discountsDisabled ? null : this.addRemoveDiscount('add', -1))}
         >
           + {AppConstants.addDiscount}
         </span>
@@ -4602,7 +4506,7 @@ class RegistrationCompetitionFee extends Component {
   };
 
   buttonShowView() {
-    if (this.state.isCreatorEdit) {
+    if (!this.state.isCompCreator) {
       return false;
     } else {
       return true;
@@ -4612,15 +4516,12 @@ class RegistrationCompetitionFee extends Component {
   ////////next button view for navigation
   nextButtonView = () => {
     let tabKey = this.state.competitionTabKey;
-    // let competitionId = this.props.competitionFeesState.competitionId;
     let isPublished = this.state.permissionState.isPublished;
-    // let allDisable = this.state.permissionState.allDisable;
     return (
       <Button
         className="publish-button marginLeft24 margin-top-disabled-button"
         data-testid={AppUniqueId.NEXT_BUTTON}
         type="primary"
-        // disabled={allDisable}
         htmlType="submit"
         onClick={() =>
           this.setState({
@@ -4640,8 +4541,7 @@ class RegistrationCompetitionFee extends Component {
     let tabKey = this.state.competitionTabKey;
     let competitionId = competitionFeesState.competitionId;
     let isPublished = this.state.permissionState.isPublished;
-    let allDisable = this.state.permissionState.allDisable;
-    let isCreatorEdit = this.state.isCreatorEdit;
+    let isCompCreator = this.state.isCompCreator;
     let invitees = competitionFeesState.competitionDetailData.invitees;
     let directComp = isArrayNotEmpty(invitees) ? invitees[0].registrationInviteesRefId == 5 : false;
 
@@ -4703,7 +4603,7 @@ class RegistrationCompetitionFee extends Component {
                     onMouseEnter={() =>
                       this.setState({
                         tooltipVisiblePublish:
-                          isPublished && tabKey === TabKey.Membership ? true : allDisable,
+                          isPublished && tabKey === TabKey.Membership,
                       })
                     }
                     onMouseLeave={() => this.setState({ tooltipVisiblePublish: false })}
@@ -4721,9 +4621,9 @@ class RegistrationCompetitionFee extends Component {
                         tabKey === TabKey.Fee ||
                         tabKey === TabKey.Payment ||
                         tabKey === TabKey.Discount
-                          ? allDisable
+                          ? false
                           : tabKey === TabKey.Division
-                          ? isCreatorEdit
+                          ? !isCompCreator
                           : isPublished
                       }
                       onClick={() => {
@@ -4764,7 +4664,6 @@ class RegistrationCompetitionFee extends Component {
                     <Button
                       className="publish-button margin-top-disabled-button"
                       type="primary"
-                      // disabled={allDisable}
                       htmlType="submit"
                       onClick={() =>
                         this.setState({
@@ -4803,8 +4702,8 @@ class RegistrationCompetitionFee extends Component {
         finalmembershipProductTypes[i].membershipProductTypes = filterArray;
       }
       let empty = false;
-      let membershipDisable = this.state.permissionState.membershipDisable;
-      if (this.state.competitionTabKey == TabKey.Membership && membershipDisable == false) {
+      const membershipEnabled = this.state.permissionState?.membership?.enabled;
+      if (this.state.competitionTabKey == TabKey.Membership && membershipEnabled) {
         if (!isArrayNotEmpty(finalmembershipProductTypes)) {
           message.error(ValidationConstants.please_SelectMembership_Product);
           empty = true;
@@ -4815,8 +4714,8 @@ class RegistrationCompetitionFee extends Component {
           }
         }
       }
-      let divisionsDisable = this.state.permissionState.divisionsDisable;
-      if (this.state.competitionTabKey == TabKey.Division && divisionsDisable == false) {
+      const divisionsEnabled = this.state.permissionState?.division?.enabled;
+      if (this.state.competitionTabKey == TabKey.Division && divisionsEnabled) {
         let compFeesState = this.props.competitionFeesState;
         let divisionArrayData = compFeesState.competitionDivisionsData;
         if (this.checkDivisionEmpty(divisionArrayData)) {
@@ -4930,7 +4829,7 @@ class RegistrationCompetitionFee extends Component {
                         checkUncheckcompetitionFeeSction={
                           this.props.checkUncheckcompetitionFeeSction
                         }
-                        isCreatorEdit={this.state.isCreatorEdit}
+                        isCompCreator={this.state.isCompCreator}
                         this_Obj={this}
                         onRef={this.onFeeRef}
                       ></CompetitionFeeTab>

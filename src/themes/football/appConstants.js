@@ -629,6 +629,7 @@ const AppConstants = {
   selectCourt: 'Select Field',
   selectGrade: 'Select Division',
   pleaseSelectCourtId: 'Please select field id',
+  pleaseSelectDivision: 'Please Select an Age Group',
   round_1: 'Round 1',
   round_2: 'Round 2',
   selectRoundOne: 'Select Round 1',
@@ -1916,6 +1917,8 @@ const AppConstants = {
   enterHomeTeamPenaltyScore: 'Enter Home Team Penalty Score',
   enterAwayTeamPenlatyScore: 'Enter Away Team Penalty Score',
   umpireAvailability: 'Referee Availability',
+  myUmpiringAvailability: 'My Refereeing Availability',
+  please_sel_umpire_unavailable_time: 'Please select the dates/times you are unavailable to referee and click Save.',
   subCourtSize: 'Sub-Field Size',
   NumberOfSubCourts: 'Number of Sub-Fields',
   moreThanOneMsg:
@@ -1958,6 +1961,7 @@ const AppConstants = {
   externalRegistrationMoveDisabled:
     'Your Member Federation has disabled the ability to move Football Australia Registrations.',
   moveMessageSuccess: 'Sucessfully moved registrations.',
+  replicateMessageSuccess: 'Sucessfully replicated players.',
   userRoles: [
     {
       role: 'Player',

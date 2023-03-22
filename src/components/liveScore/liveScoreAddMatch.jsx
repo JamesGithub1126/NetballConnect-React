@@ -335,8 +335,8 @@ class LiveScoreAddMatch extends Component {
           isLineUpEnable = lineupSelectionEnabled;
           // match_status = status;
         }
-
-        if (isLineUpEnable == 1) {
+        const lineupOnByDefault = isBasketball || isFootball;
+        if (isLineUpEnable == 1 || lineupOnByDefault) {
           this.setState({ isLineUp: 1 });
           this.props.liveScoreGetMatchDetailInitiate(this.props.location.state.matchId, 1);
         } else {

@@ -14,7 +14,7 @@ import { GradesOrPools } from 'enums/enums';
 
 const { Option } = Select;
 
-const GradePoolNames = () => {
+const GradePoolNames = ({ disabled = true }) => {
   const dispatch = useDispatch();
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -47,7 +47,6 @@ const GradePoolNames = () => {
       dispatch(gradesReferenceListAction());
     }
   }, []);
-  const disabledStatus = false;
 
   const performAllDivisionOperation = (checkedVal, competitionGradeNamingDivisions, index) => {
     let allDivObj = { ...competitionGradeNamingDivisions[index] };
@@ -281,22 +280,22 @@ const GradePoolNames = () => {
         <div className="fluid-width">
           <div className="d-flex">
             <div className="applicable-to-heading pt-0">{AppConstants.gradePoolNames}</div>
-            <div
-              className="transfer-image-view pt-0 pointer ml-auto"
-              style={{ cursor: disabledStatus && 'no-drop' }}
-              onClick={() =>
-                disabledStatus === false && deleteModal(item.compGradeNamingTemplateId)
-              }
-            >
-              <span className="user-remove-btn">
-                <i className="fa fa-trash-o" aria-hidden="true" />
-              </span>
-              <span className="user-remove-text">{AppConstants.remove}</span>
-            </div>
+            {disabled ? null : (
+              <div
+                className="transfer-image-view pt-0 pointer ml-auto"
+                style={{ cursor: disabled && 'no-drop' }}
+                onClick={() => disabled === false && deleteModal(item.compGradeNamingTemplateId)}
+              >
+                <span className="user-remove-btn">
+                  <i className="fa fa-trash-o" aria-hidden="true" />
+                </span>
+                <span className="user-remove-text">{AppConstants.remove}</span>
+              </div>
+            )}
           </div>
           <Checkbox
             id={AppUniqueId.apply_match_format_All_divisions_Checkbox}
-            disabled={disabledStatus}
+            disabled={disabled}
             className="single-checkbox pt-2"
             checked={isAllDivisionChecked}
             onChange={e => onChangeAllDivision(e, gradesPoolsData, index)}
@@ -308,7 +307,7 @@ const GradePoolNames = () => {
               <div className="row">
                 <div className="col-sm">
                   <Select
-                    disabled={disabledStatus}
+                    disabled={disabled}
                     mode="multiple"
                     className="w-100"
                     style={{ paddingRight: 1, minWidth: 182 }}
@@ -337,6 +336,7 @@ const GradePoolNames = () => {
         >
           <Radio.Group
             className="reg-competition-radio"
+            disabled={disabled}
             onChange={e =>
               dispatch(
                 updateCompetitionGradePoolsAction(
@@ -365,7 +365,7 @@ const GradePoolNames = () => {
     <div>
       {gradePoolsList()}
       {deleteConfirmModalView()}
-      {!isAllDivisionChecked && (
+      {!isAllDivisionChecked && !disabled && (
         <span className="input-heading-add-another pointer" onClick={addCompetitionGradePool}>
           + {AppConstants.addDivision}
         </span>

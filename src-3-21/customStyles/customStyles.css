@@ -1,0 +1,500 @@
+/* Styling for fees table inside the forms */
+
+.fees-table .ant-table-tbody > tr > td {
+  border-bottom: 0;
+  padding: 6px 6px;
+  overflow-wrap: break-word;
+}
+
+.fees-table .ant-table-thead > tr > th {
+  border-bottom: 0;
+  font-weight: 500;
+  font-family: inter-medium, sans-serif;
+  font-size: 13px;
+  padding: 7px 7px;
+  overflow-wrap: break-word;
+  background-color: transparent;
+}
+
+/* Styling for data list table inside the home dashboard, list products etc */
+
+.home-dashboard-table .ant-table-thead > tr > th {
+  font-weight: 500;
+  font-family: inter-medium, sans-serif;
+  font-size: 13px;
+  overflow-wrap: break-word;
+  color: var(--app-9b9bad);
+  /* padding-left: 21px; */
+  height: 48px;
+  background-color: var(--app-white);
+}
+
+.home-dashboard-table .ant-table-tbody > tr > td {
+  overflow-wrap: break-word;
+  color: var(--app-4c4c6d);
+  font-family: inter, sans-serif;
+  height: 64px;
+  background-color: var(--app-white);
+  /* padding-left: 21px; */
+}
+.home-dashboard-table .ant-table-tbody .dashboard-link-color {
+  color: var(--app-color);
+}
+
+.home-dashboard-table
+  .ant-table-thead
+  > tr.ant-table-row-hover:not(.ant-table-expanded-row):not(.ant-table-row-selected)
+  > td,
+.home-dashboard-table
+  .ant-table-tbody
+  > tr.ant-table-row-hover:not(.ant-table-expanded-row):not(.ant-table-row-selected)
+  > td,
+.home-dashboard-table
+  .ant-table-thead
+  > tr:hover:not(.ant-table-expanded-row):not(.ant-table-row-selected)
+  > td,
+.home-dashboard-table
+  .ant-table-tbody
+  > tr:hover:not(.ant-table-expanded-row):not(.ant-table-row-selected)
+  > td {
+  background: var(--app-f1c2a2) !important;
+}
+
+.home-dashboard-table .ant-table-tbody > tr.ant-table-row-selected > td {
+  background: var(--app-f1c2a2) !important;
+}
+
+/* on Hover remove on link click */
+
+.text-decoration-none {
+  text-decoration: none;
+}
+
+/* Input with heading component styling */
+
+.input {
+  color: var(--app-1b1b34);
+  text-overflow: ellipsis;
+}
+
+.textAreaInput textarea.ant-input {
+  min-height: 90px !important;
+  color: var(--app-1b1b34);
+  font-family: inter, sans-serif;
+}
+
+.input-heading {
+  display: flex;
+  align-content: flex-start;
+  padding-top: 20px;
+  padding-bottom: 11px;
+  font-size: 13px;
+  color: var(--app-4c4c6d);
+  font-weight: 500;
+  font-family: inter-medium, sans-serif;
+}
+
+.input-heading__optional {
+  display: inline-block;
+  vertical-align: middle;
+  color: var(--app-bbbbc6);
+  font-weight: 500;
+  margin-left: 4px;
+  font-style: normal;
+}
+
+.comment-heading {
+  display: contents;
+  align-content: flex-start;
+  padding-top: 20px;
+  padding-bottom: 11px;
+  font-size: 13px;
+  color: var(--app-4c4c6d);
+  font-weight: 500;
+  font-family: inter-medium, sans-serif;
+}
+
+.form-err {
+  margin-top: 1%;
+  color: tomato;
+  font-size: 12px;
+  display: flex;
+  flex-direction: row;
+}
+
+.custom-heading-text {
+  display: flex;
+  align-content: flex-start;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-size: 13px;
+  color: var(--app-4c4c6d);
+  font-weight: 500;
+  font-family: inter-medium, sans-serif;
+}
+
+.head-decription-text {
+  display: flex;
+  align-content: flex-start;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-size: 13px;
+  color: var(--app-1b1b34);
+  font-weight: 500;
+  font-family: inter-medium, sans-serif;
+}
+
+/* time slot table in venue and times table */
+
+.time-slot-table .ant-table-tbody > tr > td {
+  border-bottom: 0;
+  padding: 6px 6px;
+  overflow-wrap: break-word;
+}
+
+.time-slot-table .ant-table-thead > tr > th {
+  border-bottom: 0;
+  font-weight: 500;
+  font-family: inter-medium, sans-serif;
+  font-size: 13px;
+  padding: 7px 7px;
+  overflow-wrap: break-word;
+  background-color: transparent;
+}
+
+.time-slot-table
+  .ant-table-thead
+  > tr.ant-table-row-hover:not(.ant-table-expanded-row):not(.ant-table-row-selected)
+  > td,
+.time-slot-table
+  .ant-table-tbody
+  > tr.ant-table-row-hover:not(.ant-table-expanded-row):not(.ant-table-row-selected)
+  > td,
+.time-slot-table
+  .ant-table-thead
+  > tr:hover:not(.ant-table-expanded-row):not(.ant-table-row-selected)
+  > td,
+.time-slot-table
+  .ant-table-tbody
+  > tr:hover:not(.ant-table-expanded-row):not(.ant-table-row-selected)
+  > td {
+  background: transparent;
+}
+
+/* time picker antd on venue and times add screen */
+
+.comp-venue-time-timepicker .ant-time-picker-input {
+  height: 56px;
+}
+
+/* time picker antd on venue and times prioritisation screen */
+
+.comp-venue-time-datepicker .ant-input-lg {
+  height: 44px;
+  color: var(--app-1b1b34);
+  font-size: 13px;
+  font-family: inter, sans-serif;
+}
+
+/* header view and content view for drag and drag screens */
+
+.comp-draws-header-view.ant-layout-header {
+  background-color: transparent;
+  margin-top: 3%;
+  padding: 0;
+  display: flex;
+  align-content: flex-end;
+}
+
+.comp-draw-head-content-view {
+  padding: 0 15.5%;
+}
+
+.comp-draw-content-view {
+  border-radius: 10px;
+  box-shadow: 0 8px 16px 0 rgba(27, 27, 52, 0.06);
+  background-color: var(--app-white);
+  margin-top: 5%;
+}
+
+/* antd year select override styles for small select */
+
+.year-select-view {
+  padding-left: 40px;
+  padding-right: 40px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.year-select-heading {
+  font-size: 13px;
+  color: var(--app-9b9bad);
+  font-weight: 500;
+  font-family: inter-medium, sans-serif;
+}
+
+.year-select .ant-select-selection {
+  height: 29px;
+  display: flex;
+  align-items: center;
+  background-color: transparent;
+  border: 0;
+}
+
+.year-select .ant-select-arrow svg {
+  display: inline-block;
+  height: 9px;
+  width: 10px;
+  margin-top: 2px;
+}
+
+.year-select .ant-select-arrow {
+  right: 10px;
+}
+
+.year-select .ant-select-focused .ant-select-selection,
+.year-select .ant-select-selection:focus,
+.year-select .ant-select-selection:active {
+  border-color: transparent;
+  -webkit-box-shadow: 0 0 0 1px transparent;
+  box-shadow: 0 0 0 1px transparent;
+}
+
+/* header override for mobile */
+
+.form-header-view.ant-layout-header {
+  padding: 0 4.5%;
+}
+
+.user-img-wrap img {
+  height: 100%;
+  width: 100%;
+}
+
+.search-prefix-icon-style {
+  color: rgba(0, 0, 0, 0.25);
+  height: 16px;
+  width: 16px;
+}
+
+.error-message-column {
+  min-width: 400px;
+}
+
+.error-message-inside {
+  color: var(--app-color);
+}
+
+.form-footer-button-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  width: 70%;
+  margin: 34px auto 100px;
+}
+
+.text-overflow {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 767px) {
+  .form-header-view.ant-layout-header {
+    padding: 0;
+  }
+
+  .comp-draw-head-content-view {
+    padding: 0 7%;
+  }
+
+  .button-with-search {
+    padding-left: 18px;
+    padding-top: 10px;
+    align-items: center;
+  }
+
+  .form-footer-button-wrapper {
+    width: 87%;
+  }
+}
+
+.refund-table .ant-table-thead > tr > th {
+  font-weight: 500;
+  font-family: inter-medium, sans-serif;
+  font-size: 10px;
+  overflow-wrap: break-word;
+  color: var(--app-9b9bad);
+  background-color: var(--app-white);
+  padding: 8px;
+  text-align: center;
+}
+
+.refund-table .ant-table-tbody > tr > td {
+  overflow-wrap: break-word;
+  color: var(--app-4c4c6d);
+  font-size: 10px;
+  font-family: inter, sans-serif;
+  background-color: var(--app-white);
+  padding: 8px;
+  text-align: center;
+}
+
+.refund-table
+  .ant-table-thead
+  > tr.ant-table-row-hover:not(.ant-table-expanded-row):not(.ant-table-row-selected)
+  > td,
+.refund-table
+  .ant-table-tbody
+  > tr.ant-table-row-hover:not(.ant-table-expanded-row):not(.ant-table-row-selected)
+  > td,
+.refund-table
+  .ant-table-thead
+  > tr:hover:not(.ant-table-expanded-row):not(.ant-table-row-selected)
+  > td,
+.home-dashboard-table
+  .ant-table-tbody
+  > tr:hover:not(.ant-table-expanded-row):not(.ant-table-row-selected)
+  > td {
+  background: var(--app-f1c2a2) !important;
+}
+
+.offlineAlert {
+  width: 100%;
+  position: sticky;
+  z-index: 100;
+  top: 0;
+}
+
+.confirmation-modal {
+  text-align: center;
+}
+
+.confirmation-modal a {
+  display: block;
+  color: #000;
+  margin: 15px;
+  text-decoration: underline;
+}
+
+.confirmation-modal .ant-checkbox-wrapper {
+  color: #4f534f;
+}
+
+.confirmation-modal .ant-modal-title {
+  font-weight: bold;
+}
+
+.terms-and-conditions-checkbox {
+  margin-top: 15px;
+}
+
+.terms-and-conditions-checkbox span {
+  font-weight: normal;
+}
+
+.font-12 {
+  font-size: 11px;
+}
+
+.regenerateTitle {
+  font-size: 15px;
+  font-weight: 700;
+  margin-left: 10px;
+  color: var(--app-1b1b34);
+}
+
+.column-info {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex start;
+}
+
+.info-column-gap {
+  padding-right: max(15%, 5px);
+  padding-left: 0;
+}
+
+.info-icon {
+  font-size: 16px;
+  color: var(--app-color) !important;
+}
+
+.step-title {
+  font-size: 15px;
+}
+
+.step-desc {
+  font-size: 13px;
+}
+
+.warning-msg {
+  font-size: 15px;
+  font-family: inter, sans-serif;
+  color: red !important;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+.disabled {
+  color: rgba(0, 0, 0, 0.25) !important;
+  cursor: not-allowed !important;
+}
+
+.org-borrow-mem-table .ant-table-thead > tr > th,
+.modal-table-small .ant-table-thead > tr > th {
+  font-weight: 500;
+  font-family: inter-medium, sans-serif;
+  font-size: 13px;
+  overflow-wrap: break-word;
+  color: var(--app-9b9bad);
+  background-color: var(--app-white);
+}
+.org-borrow-mem-table .ant-table-tbody > tr.ant-table-row-selected > td,
+.modal-table-small .ant-table-tbody > tr.ant-table-row-selected > td {
+  background: var(--app-f1c2a2) !important;
+}
+
+.table-header {
+  font-weight: 500;
+  font-family: inter-medium, sans-serif;
+  font-size: 13px;
+  overflow-wrap: break-word;
+  padding-left: 21px;
+  height: 48px;
+  padding: 16px;
+}
+
+.text-v-center {
+  display: flex;
+  align-items: center;
+}
+.v-baseline {
+  vertical-align: baseline !important;
+}
+.text-center .ant-input-number-input {
+  text-align: center;
+}
+.text-underline {
+  text-decoration: underline;
+}
+
+.availability-time-slot {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #f0f0f0;
+}
+
+.availability-time-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.availability-time-label {
+  position: absolute;
+  top: -80%;
+  left: 10px;
+}

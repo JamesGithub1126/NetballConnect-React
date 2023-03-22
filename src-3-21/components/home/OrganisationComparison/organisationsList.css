@@ -1,0 +1,36 @@
+@import '../../../../src/themes/colorVariables.css';
+
+
+.org-growth-name-label {
+    font-size: 25px;
+    color: var(--app-4c4c6d);
+    display: flex;
+    justify-content: space-between;
+    font-weight: 500;
+    font-family: inter-medium, sans-serif;
+}
+
+.org-name-head, .org-growth-head {
+    font-weight: 600;
+}
+
+.org-name {
+    text-align: left;
+}
+
+.org-growth-value {
+    text-align: right;
+}
+
+.org-growth-value a {
+    color: var(--app-color) !important;
+    font-weight: 500;
+}
+
+.org-name, .org-growth-value {
+    padding: 5px 0;
+    font-family: inter-medium, sans-serif;
+    color: var(--app-77778f);
+}
+
+

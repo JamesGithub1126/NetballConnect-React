@@ -6,6 +6,7 @@ import { useOrganisation } from 'customHooks/hooks';
 import { RegistrationUserRoles } from 'enums/registrationEnums';
 import { setYearRefIdCommon } from 'store/actions/appAction';
 import {
+  resetSelections,
   getAffiliates,
   getCompetitions,
   getDivisions,
@@ -43,6 +44,9 @@ const Content = () => {
         yearRefId: modalYearRefId,
       }),
     );
+
+    // Reset selected values.
+    return () => dispatch(resetSelections());
   }, []);
 
   const onChangeYearRefId = useCallback(
@@ -116,7 +120,7 @@ const Content = () => {
         loading={onLoadComp}
         value={competitionUniqueKey}
         onChange={onChangeCompetition}
-        placeholder={AppConstants.pleaseSelectCompetition}
+        placeholder={AppConstants.pleaseSelectCompetitions}
         mode="multiple"
         className={'w-100'}
       />
@@ -125,6 +129,7 @@ const Content = () => {
         loading={onLoadOrg}
         value={affiliateId}
         onChange={onChangeAffiliate}
+        placeholder={AppConstants.pleaseSelectAffiliate}
         className={'w-100'}
       />
       <SelectDivision
@@ -132,6 +137,7 @@ const Content = () => {
         loading={onLoadDiv}
         value={divisionId}
         onChange={onChangeDivision}
+        placeholder={AppConstants.pleaseSelectDivision}
         hidden={!isPlayerRole}
         className={'w-100'}
       />

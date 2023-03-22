@@ -22,7 +22,7 @@ const RegInviteesView = ({
   organisationTypeRefId,
   yearRefId,
   regInviteesDisable,
-  isAffiliateEdit,
+  isCompCreator,
 }) => {
   const dispatch = useDispatch();
   const competitionFeesState = useSelector(state => state.CompetitionFeesState);
@@ -32,7 +32,7 @@ const RegInviteesView = ({
   if (!competitionFeesState || !appState) {
     return null;
   }
-  
+
   const {
     affiliateSelected,
     anyOrgSelected,
@@ -126,7 +126,14 @@ const RegInviteesView = ({
                         subItem.id == 2 ? (
                           <div key={'i' + subItem.id} style={{ marginLeft: 20 }}>
                             {disableInvitee(subItem, organisationTypeRefId) && (
-                              <Radio data-testid={AppUniqueId.REGISTRATION_INVITEES_2ND_LEVEL_AFFILIATES + subItem.id} key={subItem.id} value={subItem.id}>
+                              <Radio
+                                data-testid={
+                                  AppUniqueId.REGISTRATION_INVITEES_2ND_LEVEL_AFFILIATES +
+                                  subItem.id
+                                }
+                                key={subItem.id}
+                                value={subItem.id}
+                              >
                                 {subItem.description}
                               </Radio>
                             )}
@@ -135,7 +142,14 @@ const RegInviteesView = ({
                           <React.Fragment key={'i' + subItem.id}>
                             <div style={{ marginLeft: 20 }}>
                               {disableInvitee(subItem, organisationTypeRefId) && (
-                                <Radio data-testid={AppUniqueId.REGISTRATION_INVITEES_2ND_LEVEL_AFFILIATES+ subItem.id} key={subItem.id} value={subItem.id}>
+                                <Radio
+                                  data-testid={
+                                    AppUniqueId.REGISTRATION_INVITEES_2ND_LEVEL_AFFILIATES +
+                                    subItem.id
+                                  }
+                                  key={subItem.id}
+                                  value={subItem.id}
+                                >
                                   {subItem.description}
                                 </Radio>
                               )}
@@ -269,7 +283,12 @@ const RegInviteesView = ({
                 <div key={item.id}>
                   {item.subReferences.length === 0 ? (
                     <div className="contextualHelp-RowDirection">
-                      <Radio data-testid= {AppUniqueId.REGISTRATION_INVITEES_DIRECT + item.description} value={item.id}>{item.description}</Radio>
+                      <Radio
+                        data-testid={AppUniqueId.REGISTRATION_INVITEES_DIRECT + item.description}
+                        value={item.id}
+                      >
+                        {item.description}
+                      </Radio>
                       <div className="ml-n20 mt-2">
                         <CustomToolTip>
                           <span>{item.helpMsg}</span>
@@ -302,7 +321,7 @@ const RegInviteesView = ({
       </div>
 
       {/************************************** add invitees **************************************/}
-      {competitionDetailData.statusRefId === 2 && !otherSelected && !isAffiliateEdit && (
+      {competitionDetailData.statusRefId === 2 && !otherSelected && isCompCreator && (
         <Button
           key="add invites"
           className="mt-5 ant-btn ant-btn-primary"

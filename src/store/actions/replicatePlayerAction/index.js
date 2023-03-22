@@ -49,3 +49,9 @@ export const toggleModalVisibility = payload => {
     payload,
   };
 };
+
+export const resetSelections = () => {
+  return {
+    type: ApiConstants.API_REPLICATE_PLAYER_RESET_SELECTIONS,
+  };
+};

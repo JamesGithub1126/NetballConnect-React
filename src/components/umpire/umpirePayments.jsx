@@ -168,11 +168,17 @@ const listeners = key => ({
   onClick: () => tableSort(key),
 });
 
-const isShowTickOnActivity = matchAction => {
-  if (!matchAction) {
+const isShowTickOnActivity = match => {
+  if (!match || !match.competition || !match.matchAction) {
     return false;
   }
-  if (matchAction.verifiedScores && matchAction.verifiedActionLogs) {
+  const verifiedScores =
+    match.competition.acceptScoring === 'SCORER'
+      ? 'N/A'
+      : match.matchAction.nextAction === 'VERIFY_SCORES'
+      ? 'No'
+      : 'Yes';
+  if (verifiedScores === 'Yes' && match.matchAction.verifiedActionLogs) {
     return true;
   }
   return false;
@@ -274,7 +280,7 @@ const columns = [
           },
         }}
       >
-        {isShowTickOnActivity(record.match.matchAction) ? (
+        {isShowTickOnActivity(record.match) ? (
           <img src={AppImages.tick} alt="" className="export-image" />
         ) : (
           <img src={AppImages.crossImage} alt="" className="export-image" />
@@ -287,8 +293,12 @@ const columns = [
     dataIndex: 'type',
     key: 'type',
     sorter: true,
-    render: (type) => {
-      return <span>{type === 'OFFICIALS' ? AppConstants.officialStatisticians : AppConstants.umpire}</span>;
+    render: type => {
+      return (
+        <span>
+          {type === 'OFFICIALS' ? AppConstants.officialStatisticians : AppConstants.umpire}
+        </span>
+      );
     },
     onHeaderCell: ({ dataIndex }) => listeners(dataIndex),
   },
@@ -302,40 +312,36 @@ const columns = [
       const umpiredLinkedOrganisations = record.linkedUserOrganisations ?? [];
       if (umpiredLinkedOrganisations.length > 1) {
         return (
-            <Select
-              name={'competition_organisation_' + record.id}
-              className="w-100"
-              style={{ minWidth: 182 }}
-              onSelect={competitionOrganisationId =>
-                this_obj.props.updateUmpirePaymentData({
-                  key: 'competitionOrganisationId',
-                  data: competitionOrganisationId,
-                  umpireId: record.id,
-                })
-              }
-              value={record.competitionOrganisationId ? record.competitionOrganisationId : undefined}
-              allowClear
-              onClear={() =>
-                this_obj.props.updateUmpirePaymentData({
-                  key: 'competitionOrganisationId',
-                  data: null,
-                  umpireId: record.id,
-                })
-              }
-            >
-              {umpiredLinkedOrganisations.map(item => (
-                <Option key={'competition_organisation_' + item.id} value={item.id}>
-                  {item.name}
-                </Option>
-              ))}
-            </Select>
+          <Select
+            name={'competition_organisation_' + record.id}
+            className="w-100"
+            style={{ minWidth: 182 }}
+            onSelect={competitionOrganisationId =>
+              this_obj.props.updateUmpirePaymentData({
+                key: 'competitionOrganisationId',
+                data: competitionOrganisationId,
+                umpireId: record.id,
+              })
+            }
+            value={record.competitionOrganisationId ? record.competitionOrganisationId : undefined}
+            allowClear
+            onClear={() =>
+              this_obj.props.updateUmpirePaymentData({
+                key: 'competitionOrganisationId',
+                data: null,
+                umpireId: record.id,
+              })
+            }
+          >
+            {umpiredLinkedOrganisations.map(item => (
+              <Option key={'competition_organisation_' + item.id} value={item.id}>
+                {item.name}
+              </Option>
+            ))}
+          </Select>
         );
       }
-      return (
-        <span>
-          {linkedOrganisationName}
-        </span>
-      );
+      return <span>{linkedOrganisationName}</span>;
     },
   },
   {
@@ -796,14 +802,17 @@ class UmpirePayments extends Component {
         this.props.getUmpireDashboardVenueList(competitionId);
       }
 
-      this.setState({
-        selectedComp: competitionId,
-        loading: false,
-        competitionUniqueKey: competitionUniqueKey,
-        compArray: compList,
-        venueLoad: true,
-        liveScoreCompIsParent,
-      }, () => this.fetchUmpireData());
+      this.setState(
+        {
+          selectedComp: competitionId,
+          loading: false,
+          competitionUniqueKey: competitionUniqueKey,
+          compArray: compList,
+          venueLoad: true,
+          liveScoreCompIsParent,
+        },
+        () => this.fetchUmpireData(),
+      );
     }
 
     if (!isEqual(prevProps.umpireDashboardState, this.props.umpireDashboardState)) {
@@ -817,7 +826,7 @@ class UmpirePayments extends Component {
     if (this.state.paymentLoad == true && this.props.umpirePaymentState.onPaymentLoad === false) {
       if (this.state.selectedComp) {
         this.setState({ paymentLoad: false }, () => {
-          this.fetchUmpireData()
+          this.fetchUmpireData();
         });
       }
     }
@@ -1013,9 +1022,7 @@ class UmpirePayments extends Component {
   onChangeSearchText = e => {
     const value = e.target.value;
     this.setState({ searchText: e.target.value, offsetData: 0 }, () => {
-      const {
-        selectedComp,
-      } = this.state;
+      const { selectedComp } = this.state;
       if (value === null || value === '') {
         if (selectedComp) {
           this.fetchUmpireData();
@@ -1041,10 +1048,7 @@ class UmpirePayments extends Component {
 
   onClickSearchIcon = () => {
     this.setState({ offsetData: 0 }, () => {
-      const {
-        searchText,
-        selectedComp,
-      } = this.state;
+      const { searchText, selectedComp } = this.state;
       if (!(searchText === null || searchText === '')) {
         if (selectedComp) {
           this.fetchUmpireData();
@@ -1241,33 +1245,40 @@ class UmpirePayments extends Component {
     }
 
     const liveScoreCompIsParent = checkLivScoreCompIsParent();
-    this.setState({
-      selectedComp,
-      competitionOrganisationId: '',
-      liveScoreCompIsParent,
-      division: 'All',
-      round: 'All',
-    }, () => {
-      if (selectedComp) {
-        this.props.getUmpireDashboardVenueList(selectedComp);
-        this.props.getUmpireDashboardDivisionList(selectedComp);
-        this.props.getUmpirePaymentLinkedOrganisationData(selectedComp);
-        this.props.umpireRoundListAction(selectedComp, '');
-        this.fetchUmpireData();
-      }
-    });
+    this.setState(
+      {
+        selectedComp,
+        competitionOrganisationId: '',
+        liveScoreCompIsParent,
+        division: 'All',
+        round: 'All',
+      },
+      () => {
+        if (selectedComp) {
+          this.props.getUmpireDashboardVenueList(selectedComp);
+          this.props.getUmpireDashboardDivisionList(selectedComp);
+          this.props.getUmpirePaymentLinkedOrganisationData(selectedComp);
+          this.props.umpireRoundListAction(selectedComp, '');
+          this.fetchUmpireData();
+        }
+      },
+    );
   };
 
   onLinkedOrganisationChange = competitionOrganisationId => {
-    this.setState({
-      competitionOrganisationId,
-    }, () => this.fetchUmpireData());
-  }
+    this.setState(
+      {
+        competitionOrganisationId,
+      },
+      () => this.fetchUmpireData(),
+    );
+  };
 
   fetchUmpireData() {
     if (this.state.selectedComp) {
       const { pageSize = 10 } = this.props.umpirePaymentState;
-      const { sortBy, sortOrder, offsetData, liveScoreCompIsParent, competitionOrganisationId } = this.state;
+      const { sortBy, sortOrder, offsetData, liveScoreCompIsParent, competitionOrganisationId } =
+        this.state;
       const body = {
         paging: {
           limit: pageSize,
@@ -1368,7 +1379,9 @@ class UmpirePayments extends Component {
       ? this.props.umpireCompetitionState.umpireComptitionList
       : [];
 
-    let linkedOrganisations = isArrayNotEmpty(this.props.umpirePaymentSettingState.umpireLinkedOrganisationList)
+    let linkedOrganisations = isArrayNotEmpty(
+      this.props.umpirePaymentSettingState.umpireLinkedOrganisationList,
+    )
       ? this.props.umpirePaymentSettingState.umpireLinkedOrganisationList
       : [];
     const { umpireVenueList, umpireDivisionList, umpireRoundList } =
@@ -1411,10 +1424,14 @@ class UmpirePayments extends Component {
             </Select>
           </div>
           <div className="grid-selection">
-            <span className="linked-organisation-select-heading">{AppConstants.officialOrganisation}:</span>
+            <span className="linked-organisation-select-heading">
+              {AppConstants.officialOrganisation}:
+            </span>
             <Select
               className="linked-organisation-select"
-              onChange={competitionOrganisationId => this.onLinkedOrganisationChange(competitionOrganisationId)}
+              onChange={competitionOrganisationId =>
+                this.onLinkedOrganisationChange(competitionOrganisationId)
+              }
               value={this.state.competitionOrganisationId || ''}
               loading={this.props.umpireCompetitionState.onLoad}
             >
@@ -1825,7 +1842,7 @@ class UmpirePayments extends Component {
     } = this.props.umpirePaymentState;
     return (
       <div className="fluid-width default-bg">
-        <DashboardLayout menuHeading={AppConstants.umpires} menuName={AppConstants.umpires} />
+        <DashboardLayout menuHeading={AppConstants.officials} menuName={AppConstants.officials} />
         <InnerHorizontalMenu menu="umpire" umpireSelectedKey="7" />
         <Loader visible={this.props.umpirePaymentState.onPaymentLoad} />
         <Layout>

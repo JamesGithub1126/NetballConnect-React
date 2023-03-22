@@ -123,6 +123,7 @@ import WorkingHours from './UmpireAvailability/workingHours';
 import ManageVenues from './UmpireAvailability/manageVenues';
 import { getLiveScoreSettingInitiate } from '../../store/actions/LiveScoreAction/LiveScoreSettingAction';
 import { UserAvailability } from './UmpireAvailability/userAvailability';
+import MyUmpiringAvailability from './UmpireAvailability/myUmpiringAvailability';
 import SwitchUserProfileModal from './modal/SwitchUserProfileModal';
 
 function tableSort(a, b, key) {
@@ -1241,7 +1242,6 @@ const columnsPersonalPrimaryContacts = [
               )}
             </>
           )}
-         
         </SubMenu>
       </Menu>
     ),
@@ -1401,7 +1401,6 @@ const columnsPersonalChildContacts = [
               )}
             </>
           )}
-          
         </SubMenu>
       </Menu>
     ),
@@ -4630,140 +4629,6 @@ class UserModulePersonalDetail extends Component {
     );
   };
 
-  handleManageVenues = () => {
-    this.setState({ showManageVenuesView: true });
-  };
-
-  umpireAvailabilityNewView = () => {
-    return (
-      <div className="comp-dash-table-view mt-2">
-        <div className="user-module-row-heading live-score-side-desc-view">
-          {AppConstants.availability}
-        </div>
-        <div className="year-select-heading other-info-label">{AppConstants.timezone}</div>
-        <Select
-          className="user-prof-filter-select"
-          placeholder={AppConstants.timezone}
-          // onChange={e => this.onChangeSetValue(e, 'countryRefId')}
-          // value={userData.countryRefId}
-          style={{ width: 180 }}
-          name="timezoneRefId"
-        ></Select>
-        <div className="row" style={{ marginTop: 20 }}>
-          <div className="col-sm d-flex flex-row align-items-center">
-            <div className="user-module-row-heading">{AppConstants.applyToVenue}</div>
-            <div className="mt-n10">
-              <Tooltip placement="top">
-                <span>{AppConstants.participateCompMsg}</span>
-              </Tooltip>
-            </div>
-          </div>
-        </div>
-        <Checkbox
-          className="single-checkbox-radio-style"
-          checked={this.state.allVenues}
-          onChange={e => this.setState({ allVenues: e.target.checked })}
-        >
-          {AppConstants.allVenues}
-        </Checkbox>
-        {!this.state.allVenues && (
-          <div>
-            <div className="year-select-heading other-info-label" style={{ marginBottom: 10 }}>
-              {AppConstants.venueGroup}
-            </div>
-            <div className="row">
-              <div className="col-sm-2 d-flex flex-row align-items-center">
-                <Select
-                  className="user-prof-filter-select"
-                  style={{ width: 180 }}
-                  // onChange={e => this.onChangeSetValue(e, 'countryRefId')}
-                  // value={userData.countryRefId}
-                  name="venueGroupRefId"
-                ></Select>
-              </div>
-              <div className="col-sm d-flex flex-row align-items-center">
-                <Button
-                  className="schedule-approval-button"
-                  type="primary"
-                  htmlType="submit"
-                  onClick={this.handleManageVenues}
-                >
-                  {AppConstants.manageVenuesGroups}
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-        <WorkingHours userId={this.state.userId}></WorkingHours>
-      </div>
-    );
-  };
-
-  umpireAvailabilityView = () => {
-    const { schedule, scheduleStartDate } = this.state;
-    return (
-      <div className="comp-dash-table-view mt-2">
-        <div className="row">
-          <div className="col-3">
-            <div className="mt-5 mb-5">
-              <div className="user-module-row-heading d-flex align-items-center">
-                {AppConstants.venues}
-              </div>
-              <Select name="yearRefId" className="user-prof-filter-select w-100" value={-1}>
-                <Option key={-1} value={-1}>
-                  {AppConstants.allVenues}
-                </Option>
-              </Select>
-            </div>
-            <div className="mb-5">
-              <div className=" user-module-row-heading d-flex align-items-center mb-1">
-                {AppConstants.dateRange}
-              </div>
-              <WeekPicker
-                className="w-100"
-                onChange={this.handleChangeDate}
-                disabledDate={this.disabledDate}
-                format={`D/MM - ${moment(scheduleStartDate).endOf('week').format('D/MM')}`}
-              />
-            </div>
-          </div>
-          <div className="col-9">
-            <Tabs activeKey={'1'}>
-              <TabPane tab={AppConstants.allVenues} key="1">
-                <ScheduleSelector
-                  selection={schedule}
-                  numDays={7}
-                  minTime={8}
-                  maxTime={22}
-                  hourlyChunks={2}
-                  startDate={scheduleStartDate}
-                  dateFormat="D/M"
-                  timeFormat="HH:mm"
-                  onChange={this.handleChangeSchedule}
-                  renderDateCell={this.renderCell}
-                />
-              </TabPane>
-            </Tabs>
-          </div>
-        </div>
-        <div>
-          <div className="mt-5">
-            <Button
-              className="schedule-approval-button"
-              type="primary"
-              htmlType="submit"
-              onClick={this.handleSaveAvailability}
-              disabled={this.props.liveScoreUmpireState.onLoad}
-              style={{ float: 'right' }}
-            >
-              {AppConstants.save}
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   purchaseActivityView = () => {
     const { onLoad, purchasesListingData, purchasesTotalCount, purchasesCurrentPage } =
       this.props.shopOrderStatusState;
@@ -5334,6 +5199,7 @@ class UserModulePersonalDetail extends Component {
       onLoadUndeleteUsers,
       userPhotoUpdate,
     } = this.props.userState;
+    const { defaultUmpireAvailability } = this.props.homeDashboardState.organisationSettings;
     const { instalmentRetryloading, regRetryloading, retryCashReceivedloading } = this.state;
     const isUserLoading = isPersonalUserLoading || isCompUserLoading;
     const personalDetails = personalByCompData != null ? personalByCompData : [];
@@ -5414,7 +5280,11 @@ class UserModulePersonalDetail extends Component {
                       )}
                       {userRole && process.env.REACT_APP_UMPIRE_AVAILABILITY_BY_VENUE == 'true' && (
                         <TabPane tab={AppConstants.umpireAvailability} key="9">
-                          <UserAvailability userId={this.state.userId} />
+                          {!!defaultUmpireAvailability ? (
+                            <UserAvailability userId={this.state.userId} />
+                          ) : (
+                            <MyUmpiringAvailability userId={this.state.userId} />
+                          )}
                         </TabPane>
                       )}
                       <TabPane tab={AppConstants.purchase} key="10">

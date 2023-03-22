@@ -322,7 +322,7 @@ const playerSeasonalTable = [
         className="input-inside-table-fees"
         value={gst}
         onChange={e => this_Obj.onChangeDetails(e.target.value, index, record, 'gst', 'seasonal')}
-        data-test={"individualCompetitionGST"}
+        data-test={'individualCompetitionGST'}
       />
     ),
   },
@@ -464,7 +464,6 @@ const playerCasualTable = [
           value={gst}
           onChange={e => this_Obj.onChangeDetails(e.target.value, index, record, 'gst', 'casual')}
           data-testid={AppUniqueId.INDIVIDUAL_USER_SINGLE_GAME_COMPETITION_FEES_GST_}
-
         />
       ) : (
         <Input disabled className="input-inside-table-fees" value="N/A" />
@@ -2809,60 +2808,60 @@ class CompetitionFeeTab extends Component {
     return orgLevel;
   };
   seasonalFeesOnOrgLevel = () => {
-    let isCreatorEdit = this.props.isCreatorEdit;
+    let isCompCreator = this.props.isCompCreator;
     let orgLevel = this.getOrgLevelForFeesTable();
-    if (isCreatorEdit && orgLevel == RegistrationInviteesName.Association) {
+    if (!isCompCreator && orgLevel == RegistrationInviteesName.Association) {
       return playerSeasonalTableAssociation;
-    } else if (isCreatorEdit && orgLevel == RegistrationInviteesName.Club) {
+    } else if (!isCompCreator && orgLevel == RegistrationInviteesName.Club) {
       return playerSeasonalTableClub;
-    } else if (isCreatorEdit && orgLevel == RegistrationInviteesName.AnyAssociation) {
+    } else if (!isCompCreator && orgLevel == RegistrationInviteesName.AnyAssociation) {
       return playerSeasonalTableAssociation;
-    } else if (isCreatorEdit && orgLevel == RegistrationInviteesName.AnyClub) {
+    } else if (!isCompCreator && orgLevel == RegistrationInviteesName.AnyClub) {
       return playerSeasonalTableClub;
     } else {
       return playerSeasonalTable;
     }
   };
   seasonalFeesTeamOnOrgTLevel() {
-    let isCreatorEdit = this.props.isCreatorEdit;
+    let isCompCreator = this.props.isCompCreator;
     let orgLevel = this.getOrgLevelForFeesTable();
-    if (isCreatorEdit && orgLevel == RegistrationInviteesName.Association) {
+    if (!isCompCreator && orgLevel == RegistrationInviteesName.Association) {
       return playerSeasonalTableTeamAssociation;
-    } else if (isCreatorEdit && orgLevel == RegistrationInviteesName.Club) {
+    } else if (!isCompCreator && orgLevel == RegistrationInviteesName.Club) {
       return playerSeasonalTableTeamClub;
-    } else if (isCreatorEdit && orgLevel == RegistrationInviteesName.AnyAssociation) {
+    } else if (!isCompCreator && orgLevel == RegistrationInviteesName.AnyAssociation) {
       return playerSeasonalTableTeamAssociation;
-    } else if (isCreatorEdit && orgLevel == RegistrationInviteesName.AnyClub) {
+    } else if (!isCompCreator && orgLevel == RegistrationInviteesName.AnyClub) {
       return playerSeasonalTableTeamClub;
     } else {
       return playerSeasonalTeamTable;
     }
   }
   casualFeesTeamOnOrgTLevel() {
-    let isCreatorEdit = this.props.isCreatorEdit;
+    let isCompCreator = this.props.isCompCreator;
     let orgLevel = this.getOrgLevelForFeesTable();
-    if (isCreatorEdit && orgLevel == RegistrationInviteesName.Association) {
+    if (!isCompCreator && orgLevel == RegistrationInviteesName.Association) {
       return playerCasualTableTeamAssociation;
-    } else if (isCreatorEdit && orgLevel == RegistrationInviteesName.Club) {
+    } else if (!isCompCreator && orgLevel == RegistrationInviteesName.Club) {
       return playerCasualTableTeamClub;
-    } else if (isCreatorEdit && orgLevel == RegistrationInviteesName.AnyAssociation) {
+    } else if (!isCompCreator && orgLevel == RegistrationInviteesName.AnyAssociation) {
       return playerCasualTableTeamAssociation;
-    } else if (isCreatorEdit && orgLevel == RegistrationInviteesName.AnyClub) {
+    } else if (!isCompCreator && orgLevel == RegistrationInviteesName.AnyClub) {
       return playerCasualTableTeamClub;
     } else {
       return playerCasualTeamTable;
     }
   }
   casualFeesOnOrgLevel() {
-    let isCreatorEdit = this.props.isCreatorEdit;
+    let isCompCreator = this.props.isCompCreator;
     let orgLevel = this.getOrgLevelForFeesTable();
-    if (isCreatorEdit && orgLevel == RegistrationInviteesName.Association) {
+    if (!isCompCreator && orgLevel == RegistrationInviteesName.Association) {
       return playerCasualTableAssociation;
-    } else if (isCreatorEdit && orgLevel == RegistrationInviteesName.Club) {
+    } else if (!isCompCreator && orgLevel == RegistrationInviteesName.Club) {
       return playerCasualTableClub;
-    } else if (isCreatorEdit && orgLevel == RegistrationInviteesName.AnyAssociation) {
+    } else if (!isCompCreator && orgLevel == RegistrationInviteesName.AnyAssociation) {
       return playerCasualTableAssociation;
-    } else if (isCreatorEdit && orgLevel == RegistrationInviteesName.AnyClub) {
+    } else if (!isCompCreator && orgLevel == RegistrationInviteesName.AnyClub) {
       return playerCasualTableClub;
     } else {
       return playerCasualTable;
@@ -2886,7 +2885,7 @@ class CompetitionFeeTab extends Component {
   render() {
     let allStates = this.props.competitionFeesState;
     let feeDetails = allStates.competitionFeesData;
-    let feesTableDisable = this.props.permissionState.feesTableDisable;
+    const feesTableDisable = !this.props.permissionState.fees.enabled;
     let membershipPrdArr = allStates.competitionMembershipProductData
       ? allStates.competitionMembershipProductData.membershipProducts
       : [];
@@ -2933,7 +2932,9 @@ class CompetitionFeeTab extends Component {
                     <div className="row">
                       <div className="col-sm-2 d-flex align-items-center">
                         <div className="contextualHelp-RowDirection">
-                          <Radio value="allDivisions" data-testid={AppUniqueId.ALL_DIVISION_FEES}>{AppConstants.allDivisions}</Radio>
+                          <Radio value="allDivisions" data-testid={AppUniqueId.ALL_DIVISION_FEES}>
+                            {AppConstants.allDivisions}
+                          </Radio>
                           <div className="ml-n20 mt-2">
                             <CustomToolTip>
                               <span>{AppConstants.allDivisionsMsg}</span>
@@ -2943,7 +2944,9 @@ class CompetitionFeeTab extends Component {
                       </div>
                       <div className="col-sm-2 d-flex align-items-center">
                         <div className="contextualHelp-RowDirection">
-                          <Radio value="perDivision" data-testid={AppUniqueId.PER_DIVISION_FEES}>{AppConstants.perDivision}</Radio>
+                          <Radio value="perDivision" data-testid={AppUniqueId.PER_DIVISION_FEES}>
+                            {AppConstants.perDivision}
+                          </Radio>
                           <div className="ml-n20 mt-2">
                             <CustomToolTip>
                               <span>{AppConstants.perDivisionMsg}</span>
@@ -3009,10 +3012,16 @@ class CompetitionFeeTab extends Component {
                               disabled={feesTableDisable}
                             >
                               <div className="d-flex">
-                                <Radio value={IndividualChargeType.FullSeason} data-testid={AppUniqueId.INDIVIDUAL_CHARGE_FULL_SEASON}>
+                                <Radio
+                                  value={IndividualChargeType.FullSeason}
+                                  data-testid={AppUniqueId.INDIVIDUAL_CHARGE_FULL_SEASON}
+                                >
                                   {AppConstants.chargedForFullSeason}
                                 </Radio>
-                                <Radio value={IndividualChargeType.PerMatch} data-testid={AppUniqueId.INDIVIDUAL_CHARGE_PER_GAME} >
+                                <Radio
+                                  value={IndividualChargeType.PerMatch}
+                                  data-testid={AppUniqueId.INDIVIDUAL_CHARGE_PER_GAME}
+                                >
                                   {AppConstants.chargedPerMatchPlayed}
                                 </Radio>
                               </div>
@@ -3125,7 +3134,7 @@ class CompetitionFeeTab extends Component {
                               {item.teamFeeType == TeamFeeType.PerPlayer && (
                                 <div style={{ marginTop: 5 }}>
                                   <Radio.Group
-                                    className="reg-competition-radio ml-45"                                
+                                    className="reg-competition-radio ml-45"
                                     onChange={e => {
                                       this.onChangeError(index);
                                       this.props.checkUncheckcompetitionFeeSction(
@@ -3213,7 +3222,10 @@ class CompetitionFeeTab extends Component {
                                 disabled={feesTableDisable}
                               >
                                 <div className="d-flex">
-                                  <Radio value={TeamRegistrationChargeType.TeamFullSeason} data-testid={AppUniqueId.TEAM_CHARGE_FULL_SEASON}>
+                                  <Radio
+                                    value={TeamRegistrationChargeType.TeamFullSeason}
+                                    data-testid={AppUniqueId.TEAM_CHARGE_FULL_SEASON}
+                                  >
                                     {AppConstants.chargedForFullSeason}
                                   </Radio>
                                   <Radio value={TeamRegistrationChargeType.TeamPerMatch}>

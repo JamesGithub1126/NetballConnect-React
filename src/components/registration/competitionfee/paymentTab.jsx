@@ -66,14 +66,14 @@ class CompetitionPaymentTab extends Component {
   }
 
   instalmentUponReg(key, value) {
-    let paymentsDisable = this.props.permissionState.paymentsDisable;
+    let installmentDisabled = !this.props.permissionState?.payments?.installments?.enabled;
     return (
       <div className="pt-4 pb-4">
         <Switch
           onChange={e => this.props.instalmentDateAction(e, key)}
           checked={value}
           style={{ marginRight: 10 }}
-          disabled={paymentsDisable}
+          disabled={installmentDisabled}
           data-testid={AppUniqueId.INSTALLMENT_UPON_REGISTRATION}
         />
         {AppConstants.uponRegistration}
@@ -106,7 +106,7 @@ class CompetitionPaymentTab extends Component {
       index,
     };
     let instalmentDate = selectedSeasonalInstalmentDatesArrayItem.instalmentDate;
-    let paymentsDisable = this.props.permissionState.paymentsDisable;
+    let installmentDisabled = !this.props.permissionState?.payments?.installments?.enabled;
     return (
       <div className="pt-3">
         <DatePicker
@@ -118,11 +118,11 @@ class CompetitionPaymentTab extends Component {
           }
           data-testid={AppUniqueId.INSTALLMENT_DATE}
           value={instalmentDate == '' ? null : moment(instalmentDate, 'YYYY-MM-DD')}
-          disabled={paymentsDisable}
+          disabled={installmentDisabled}
         />
 
         <span style={{ marginLeft: 8, cursor: 'pointer' }}>
-          {!paymentsDisable && (
+          {!installmentDisabled && (
             <img
               className="dot-image"
               src={AppImages.redCross}
@@ -148,10 +148,10 @@ class CompetitionPaymentTab extends Component {
   }
 
   addInstalmentDateBtn(selectedSeasonalInstalmentDatesArray, key) {
-    let paymentsDisable = this.props.permissionState.paymentsDisable;
+    let installmentDisabled = !this.props.permissionState?.payments?.installments?.enabled;
     return (
       <div>
-        {!paymentsDisable && (
+        {!installmentDisabled && (
           <span
             style={{ cursor: 'pointer', paddingTop: 0 }}
             onClick={e =>
@@ -387,7 +387,7 @@ class CompetitionPaymentTab extends Component {
         ? competitionDetailData.teamSeasonalSchoolRegCode
         : null;
 
-    let paymentsDisable = this.props.permissionState.paymentsDisable;
+    let paymentsDisable = !this.props.permissionState?.payments?.enabled;
     let selectedSeasonalInstalmentDates =
       this.props.competitionFeesState.selectedSeasonalInstalmentDates;
     let selectedTeamSeasonalInstalmentDates =
@@ -474,7 +474,9 @@ class CompetitionPaymentTab extends Component {
                              </div> */}
               </div>
               <Radio.Group className="reg-competition-radio" value={1} disabled={paymentsDisable}>
-                <Radio value={1} data-testid={AppUniqueId.PAYMENT_NOMINATION_FEE}>{AppConstants.atPointOfRegistration}</Radio>
+                <Radio value={1} data-testid={AppUniqueId.PAYMENT_NOMINATION_FEE}>
+                  {AppConstants.atPointOfRegistration}
+                </Radio>
                 <div className="pl-2">{AppConstants.nominationFeeTeam}</div>
               </Radio.Group>
             </div>
@@ -503,6 +505,8 @@ class CompetitionPaymentTab extends Component {
                     }
                   }
                   let paymentOptionDisable = paymentsDisable;
+                  let installmentDisabled =
+                    !this.props.permissionState?.payments?.installments?.enabled;
                   let hasInstalment = false;
                   if (paymentOptions) {
                     hasInstalment = paymentOptions.some(
@@ -537,7 +541,9 @@ class CompetitionPaymentTab extends Component {
                           )
                         }
                         className="single-checkbox mt-1"
-                        disabled={paymentOptionDisable}
+                        disabled={
+                          item.paymentOptionRefId != 5 ? paymentOptionDisable : installmentDisabled
+                        }
                       >
                         {item.description}
                       </Checkbox>

@@ -188,30 +188,6 @@ class AddUmpire extends Component {
     }
   }
 
-  onChangeOrganisation = affiliateIds => {
-    // update affiliates of umpireData props
-    this.props.updateAddUmpireData(affiliateIds, 'affiliates');
-    // get umpireData and teamsList from umpireState umpireData props
-    const { umpireData, teamsList } = this.props.umpireState;
-    // get selected team infomation using umpireData.teamId from teamsList
-    const selectTeamList = teamsList.filter(team => {
-      return umpireData.teamId.includes(team.id);
-    });
-    // get new selected teamlist by change organisation
-    const newTeamIdList = selectTeamList
-      .filter(team => {
-        return affiliateIds.includes(team.competitionOrganisationId);
-      })
-      .map(team => team.id);
-    // update previous teamId to new teamId
-    this.props.updateAddUmpireData(newTeamIdList, 'teamId');
-    // update display value of teamSelect Field
-    this.formRef.current.setFieldsValue({
-      ...this.formRef.current.getFieldsValue(),
-      teamsNames: newTeamIdList,
-    });
-  };
-
   setSelectedAffiliateValue = affiliateIds => {
     this.formRef.current.setFieldsValue({
       umpireAffiliateName: affiliateIds,
@@ -322,6 +298,7 @@ class AddUmpire extends Component {
     } = this.props.umpireState;
     let umpireList = isArrayNotEmpty(umpireListResult) ? umpireListResult : [];
     let affilateData = isArrayNotEmpty(affilateList) ? affilateList : [];
+
     return (
       <div className="content-view pt-4">
         <div className="row">
@@ -466,12 +443,9 @@ class AddUmpire extends Component {
   };
 
   umpireNewRadioBtnView = () => {
-    const { affilateList, umpireOwnTeam, teamsList, affiliateId } = this.props.umpireState;
+    const { affilateList, umpireOwnTeam, teamsList } = this.props.umpireState;
     const { hasError } = this.state;
     const affiliateListResult = isArrayNotEmpty(affilateList) ? affilateList : [];
-    const orgTeamsList = teamsList.filter(team => {
-      return affiliateId && affiliateId.includes(team.competitionOrganisationId);
-    });
     return (
       <div className="content-view pt-4">
         <div className="row">
@@ -588,7 +562,9 @@ class AddUmpire extends Component {
                 showSearch
                 placeholder={AppConstants.selectOrganisation}
                 className="w-100"
-                onChange={affiliateIds => this.onChangeOrganisation(affiliateIds)}
+                onChange={affiliateIds =>
+                  this.props.updateAddUmpireData(affiliateIds, 'affiliates')
+                }
                 optionFilterProp="children"
                 // onSearch={(name) => this.props.getUmpireAffiliateList({ id: this.state.competition_id, name: name })}
                 // notFoundContent={onAffiliateLoad ? <Spin size="small" /> : null}
@@ -619,7 +595,7 @@ class AddUmpire extends Component {
                   onChange={teamIds => this.props.updateAddUmpireData(teamIds, 'teamId')}
                   optionFilterProp="children"
                 >
-                  {orgTeamsList.map(item => (
+                  {teamsList.map(item => (
                     <Option key={'team_' + item.id} value={item.id}>
                       {item.name}
                     </Option>
@@ -729,6 +705,7 @@ class AddUmpire extends Component {
   onSaveClick = () => {
     const { umpireData, affiliateId, umpireRadioBtn, exsitingUmpireId, umpireListData } =
       this.props.umpireState;
+
     if (umpireRadioBtn === 'new') {
       if (umpireData.mobileNumber.length !== 10) {
         this.setState({

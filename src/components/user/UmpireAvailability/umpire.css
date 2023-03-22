@@ -1,0 +1,40 @@
+.schedule-approval-button {
+  background-color: var(--app-color);
+  border-color: var(--app-color);
+  font-weight: 600;
+  font-stretch: normal;
+  font-style: normal;
+  font-family: inter-semi-bold;
+  font-size: 15px;
+  width: 130px;
+  height: 48px;
+  border-radius: 8px;
+  background-image: var(--app-gradient-right);
+  margin-left: 60px;
+}
+
+.table-actions {
+  display: flex;
+  width: fit-content;
+}
+
+.table-actions .ant-input {
+  height: 48px;
+}
+
+@media (max-width: 767px) {
+  .schedule-approval-button {
+    margin-left: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .table-actions {
+    flex-direction: column;
+    margin-left: 0;
+  }
+
+  .schedule-approval-button {
+    margin: 20px 0 0;
+  }
+}

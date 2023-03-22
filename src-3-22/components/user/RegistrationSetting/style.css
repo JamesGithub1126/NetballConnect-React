@@ -1,0 +1,37 @@
+.reg-question .ant-pagination-item {
+  vertical-align: middle;
+}
+.question-table-row td {
+  background: transparent !important;
+}
+
+.reg-question .table-responsive {
+  margin: 20px 0;
+}
+
+.reg-question .table-responsive .ant-table:first .ant-table-thead .ant-table-cell {
+  font-weight: bold;
+}
+
+.reg-question-view {
+  background-color: #f7fafc;
+}
+
+.reg-question-card {
+  background-color: white;
+  border-radius: 10px;
+}
+
+.linkshop-subtitle {
+  font-size: 13px;
+}
+
+.linkshop-remove {
+  margin-top: 54px;
+}
+
+@media (max-width: 768px) {
+  .linkshop-remove {
+    margin-top: 12px;
+  }
+}

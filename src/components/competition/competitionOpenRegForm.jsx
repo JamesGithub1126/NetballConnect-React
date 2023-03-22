@@ -53,6 +53,7 @@ import {
   getYearAndCompetitionOwnAction,
   searchVenueList,
   clearFilter,
+  getYearAndCompetitionParticipateAction,
 } from '../../store/actions/appAction';
 import { getAffiliateOurOrganisationIdAction } from '../../store/actions/userAction/userAction';
 import moment from 'moment';
@@ -60,12 +61,11 @@ import history from '../../util/history';
 import ValidationConstants from '../../themes/validationConstant';
 import { NavLink } from 'react-router-dom';
 import {
-  setOwn_competition,
-  getOwn_competition,
-  getOwn_competitionStatus,
-  setOwn_competitionStatus,
-  // getOwn_CompetitionFinalRefId,
-  setOwn_CompetitionFinalRefId,
+  set_competition,
+  get_competition,
+  get_competitionStatus,
+  set_competitionStatus,
+  set_competitionFinalRefId,
   setGlobalYear,
   getGlobalYear,
   getOrganisationData,
@@ -86,6 +86,7 @@ import {
 import { getOnlyYearListAction } from '../../store/actions/appAction';
 import RegInviteesView from '../../customComponents/RegInviteesView/regInviteesView';
 import GradePoolNames from './gradePoolNames';
+import getCompetitionPermissions from './helper/getCompetitionPermissions';
 
 const { Header, Footer, Content } = Layout;
 const { Option } = Select;
@@ -93,18 +94,6 @@ const { TextArea } = Input;
 const { TabPane } = Tabs;
 const { confirm } = Modal;
 let this_Obj = null;
-
-const permissionObject = {
-  compDetailDisable: false,
-  regInviteesDisable: false,
-  membershipDisable: false,
-  divisionsDisable: false,
-  feesTableDisable: false,
-  paymentsDisable: false,
-  discountsDisable: false,
-  allDisable: false,
-  isPublished: false,
-};
 
 const divisionTableColumns = [
   {
@@ -127,10 +116,7 @@ const divisionTableColumns = [
                 this_Obj.divisionTableDataOnchange(e.target.value, record, index, 'divisionName')
               }
               onBlur={() => this_Obj.checkDivisionName(record)}
-              disabled={
-                this_Obj.state.competitionStatus == 1 ||
-                this_Obj.state.permissionState.divisionsDisable
-              }
+              disabled={!this_Obj.state.permissionState?.division?.enabled}
             />
           </div>
         </Popover>
@@ -151,9 +137,7 @@ const divisionTableColumns = [
       <div>
         <Checkbox
           className="single-checkbox mt-1"
-          disabled={
-            this_Obj.state.competitionStatus == 1 || this_Obj.state.permissionState.divisionsDisable
-          }
+          disabled={!this_Obj.state.permissionState?.division?.enabled}
           checked={genderRestriction}
           onChange={e =>
             this_Obj.divisionTableDataOnchange(e.target.checked, record, index, 'genderRestriction')
@@ -179,10 +163,7 @@ const divisionTableColumns = [
             }
             value={genderRefId}
             placeholder="Select"
-            disabled={
-              this_Obj.state.competitionStatus == 1 ||
-              this_Obj.state.permissionState.divisionsDisable
-            }
+            disabled={!this_Obj.state.permissionState?.division?.enabled}
           >
             {this_Obj.props.commonReducerState.genderDataEnum.map(item => (
               <Option key={'gender_' + item.id} value={item.id}>
@@ -211,9 +192,7 @@ const divisionTableColumns = [
           onChange={e =>
             this_Obj.divisionTableDataOnchange(e.target.checked, record, index, 'ageRestriction')
           }
-          disabled={
-            this_Obj.state.competitionStatus == 1 || this_Obj.state.permissionState.divisionsDisable
-          }
+          disabled={!this_Obj.state.permissionState?.division?.enabled}
         />
       </div>
     ),
@@ -245,11 +224,7 @@ const divisionTableColumns = [
           format="DD-MM-YYYY"
           placeholder="dd-mm-yyyy"
           showTime={false}
-          disabled={
-            !record.ageRestriction ||
-            this_Obj.state.competitionStatus == 1 ||
-            this_Obj.state.permissionState.divisionsDisable
-          }
+          disabled={!record.ageRestriction || !this_Obj.state.permissionState?.division?.enabled}
           value={fromDate !== null && moment(fromDate)}
           disabledDate={d => !d || d.isSameOrAfter(record.toDate)}
         />
@@ -283,11 +258,7 @@ const divisionTableColumns = [
           format="DD-MM-YYYY"
           placeholder="dd-mm-yyyy"
           showTime={false}
-          disabled={
-            !record.ageRestriction ||
-            this_Obj.state.competitionStatus == 1 ||
-            this_Obj.state.permissionState.divisionsDisable
-          }
+          disabled={!record.ageRestriction || !this_Obj.state.permissionState?.division?.enabled}
           value={toDate !== null && moment(toDate)}
           disabledDate={d => moment(record.fromDate).isSameOrAfter(d, 'day')}
         />
@@ -298,22 +269,22 @@ const divisionTableColumns = [
     title: '',
     dataIndex: 'clear',
     key: 'clear',
-    render: (clear, record, index) => (
-      <span className="d-flex justify-content-center w-100 pointer">
-        <img
-          className="dot-image"
-          src={AppImages.redCross}
-          alt=""
-          width="16"
-          height="16"
-          onClick={() =>
-            !this_Obj.state.permissionState.divisionsDisable
-              ? this_Obj.addRemoveDivision(index, record, 'remove')
-              : null
-          }
-        />
-      </span>
-    ),
+    render: (clear, record, index) => {
+      const disabled = !this_Obj.state.permissionState?.division?.delete?.enabled;
+
+      return disabled ? null : (
+        <span className="d-flex justify-content-center w-100 pointer">
+          <img
+            className="dot-image"
+            src={AppImages.redCross}
+            alt=""
+            width="16"
+            height="16"
+            onClick={() => (!disabled ? this_Obj.addRemoveDivision(index, record, 'remove') : null)}
+          />
+        </span>
+      );
+    },
   },
 ];
 
@@ -322,11 +293,11 @@ const TabKey = {
   Divisions: '2',
   Preferences: '3',
 };
-
 class CompetitionOpenRegForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      key: null,
       yearRefId: null,
       value: 'NETSETGO',
       division: 'Division',
@@ -346,10 +317,10 @@ class CompetitionOpenRegForm extends Component {
       competitionIsUsed: false,
       firstTimeCompId: '',
       organisationTypeRefId: 0,
-      isCreatorEdit: false, //////// user is owner of the competition than isCreatorEdit will be false
+      isCompCreator: false,
       isPublished: false,
       isRegClosed: false,
-      permissionState: permissionObject,
+      permissionState: {},
       tooltipVisibleDelete: false,
       tooltipVisibleDraft: false,
       tooltipVisiblePublish: false,
@@ -380,17 +351,49 @@ class CompetitionOpenRegForm extends Component {
   componentDidMount() {
     window.scrollTo(0, 0);
     let orgData = getOrganisationData() ? getOrganisationData() : null;
-    this.setState({ organisationTypeRefId: orgData.organisationTypeRefId });
+    const key = this.props.location?.state?.key;
+    this.setState({ organisationTypeRefId: orgData.organisationTypeRefId, key: key });
     this.getReference();
     this.setDetailsFieldValue();
     const orgUniqueKey = JSON.parse(
       localStorage.getItem('setOrganisationData'),
     ).organisationUniqueKey;
     this.apiCalls(orgUniqueKey);
+    const isNewComp = this.checkIsNewComp();
+    const permissions = getCompetitionPermissions(isNewComp); //disable fields on initial page load
+    this.setState({ permissionState: permissions, isCompCreator: isNewComp });
+  }
+
+  getYearAndCompetition(yearId) {
+    const key = this.props.location?.state?.key;
+    const { participate_YearArr, own_YearArr } = this.props.appState;
+    if (key === 'part') {
+      this.props.getYearAndCompetitionParticipateAction(
+        participate_YearArr,
+        yearId,
+        'participate_competition',
+      );
+    } else {
+      this.props.getYearAndCompetitionOwnAction(own_YearArr, yearId, 'own_competition');
+    }
   }
 
   async componentDidUpdate(nextProps) {
+    const { key, firstTimeCompId } = this.state;
+    const nextPropsCompetitionArr =
+      key === 'part'
+        ? nextProps.appState.participate_CompetitionArr
+        : nextProps.appState.all_own_CompetitionArr;
+    const competitionTypeList =
+      key === 'part'
+        ? this.props.appState.participate_CompetitionArr
+        : this.props.appState.all_own_CompetitionArr;
+
+    const yearArr =
+      key === 'part' ? this.props.appState.participate_YearArr : this.props.appState.own_YearArr;
+
     let competitionFeesState = this.props.competitionFeesState;
+
     if (competitionFeesState.onLoad === false && this.state.loading === true) {
       this.setState({ loading: false });
       if (!competitionFeesState.error) {
@@ -427,11 +430,21 @@ class CompetitionOpenRegForm extends Component {
           : false;
 
         let creatorId = competitionFeesState.competitionCreator;
+        let hasRegistration = competitionFeesState.hasRegistration;
         let orgData = getOrganisationData() ? getOrganisationData() : null;
         let organisationUniqueKey = orgData ? orgData.organisationUniqueKey : 0;
-        let isCreatorEdit = creatorId == organisationUniqueKey ? false : true;
-
-        this.setPermissionFields(isPublished, isRegClosed, isCreatorEdit);
+        let isCompCreator = creatorId == organisationUniqueKey;
+        const isNewComp = this.checkIsNewComp();
+        let drawsPublished = this.state.competitionStatus == 1;
+        const permissions = getCompetitionPermissions(
+          isNewComp,
+          firstTimeCompId,
+          hasRegistration,
+          isPublished,
+          drawsPublished,
+          isCompCreator,
+          false,
+        );
 
         this.setState({
           getDataLoading: false,
@@ -439,7 +452,8 @@ class CompetitionOpenRegForm extends Component {
           competitionIsUsed: competitionFeesState.competitionDetailData.isUsed,
           isPublished,
           isRegClosed,
-          isCreatorEdit,
+          isCompCreator,
+          permissionState: permissions,
         });
         this.setDetailsFieldValue();
       }
@@ -450,8 +464,21 @@ class CompetitionOpenRegForm extends Component {
       }
     }
     if (nextProps.appState !== this.props.appState) {
-      let competitionTypeList = this.props.appState.all_own_CompetitionArr;
-      if (nextProps.appState.all_own_CompetitionArr !== competitionTypeList) {
+      if (nextProps.appState.yearList !== this.props.appState.yearList) {
+        if (this.props.appState.yearList.length > 0) {
+          let yearRefId = getGlobalYear()
+            ? JSON.parse(getGlobalYear())
+            : getCurrentYear(this.props.appState.yearList);
+
+          this.props.add_editcompetitionFeeDeatils(yearRefId, 'yearRefId');
+          this.setDetailsFieldValue();
+          setGlobalYear(yearRefId);
+
+          this.setState({ yearRefId: yearRefId });
+        }
+      }
+
+      if (nextPropsCompetitionArr !== competitionTypeList) {
         if (competitionTypeList.length > 0) {
           let screenKey = this.props.location.state ? this.props.location.state.screenKey : null;
           let fromReplicate = this.props.location.state
@@ -463,30 +490,37 @@ class CompetitionOpenRegForm extends Component {
           let finalTypeRefId = null;
 
           if (screenKey === 'compDashboard' || fromReplicate == 1) {
-            competitionId = getOwn_competition();
+            competitionId = get_competition(key);
+            competitionId = !competitionId ? this.props.location.state.id : null;
             let compIndex = competitionTypeList.findIndex(x => x.competitionId == competitionId);
+            competitionId = compIndex > -1 ? competitionId : competitionTypeList[0].competitionId;
             statusRefId =
               compIndex > -1
                 ? competitionTypeList[compIndex].statusRefId
                 : competitionTypeList[0].statusRefId;
-            competitionId = compIndex > -1 ? competitionId : competitionTypeList[0].competitionId;
             competitionStatus = competitionTypeList[compIndex]
               ? competitionTypeList[compIndex].competitionStatus
               : 0;
-            setOwn_competitionStatus('');
-            setOwn_competition('');
-            setOwn_CompetitionFinalRefId('');
+            set_competitionStatus(key, undefined);
+            set_competition(key, undefined);
+            set_competitionFinalRefId(key, undefined);
           } else {
             competitionId = competitionTypeList[0].competitionId;
             statusRefId = competitionTypeList[0].statusRefId;
             competitionStatus = competitionTypeList[0].competitionStatus;
             finalTypeRefId = competitionTypeList[0].finalTypeRefId;
           }
+
+          //set year data
           let yearRefId = getGlobalYear()
             ? getGlobalYear()
-            : this.props.appState.own_YearArr.length > 0 &&
-              getCurrentYear(this.props.appState.own_YearArr);
+            : yearArr.length > 0 && getCurrentYear(yearArr);
 
+          this.props.add_editcompetitionFeeDeatils(yearRefId, 'yearRefId');
+          this.setDetailsFieldValue();
+          setGlobalYear(yearRefId);
+
+          //get comp details
           this.props.getAllCompetitionFeesDeatilsAction(
             competitionId,
             null,
@@ -497,9 +531,9 @@ class CompetitionOpenRegForm extends Component {
           this.props.getDrawsRoundsAction(yearRefId, competitionId);
           if (competitionStatus == 2) {
             //ispublished
-            setOwn_competitionStatus(statusRefId); //drawsPublish
-            setOwn_competition(competitionId);
-            setOwn_CompetitionFinalRefId(finalTypeRefId);
+            set_competitionStatus(key, statusRefId); //drawsPublish
+            set_competition(key, competitionId);
+            set_competitionFinalRefId(key, finalTypeRefId);
           }
 
           this.setState({
@@ -533,10 +567,10 @@ class CompetitionOpenRegForm extends Component {
             loading: false,
           });
           await setGlobalYear(this.state.yearRefId);
-          await setOwn_competition(this.props.competitionFeesState.competitionId);
-          await setOwn_competitionStatus(this.state.statusRefId);
+          await set_competition(key, this.props.competitionFeesState.competitionId);
+          await set_competitionStatus(key, this.state.statusRefId);
           let hasPreferenceTab =
-            process.env.REACT_APP_TEAM_PREFERENCES_FOR_DRAW === 'true' && !this.state.isCreatorEdit;
+            process.env.REACT_APP_TEAM_PREFERENCES_FOR_DRAW === 'true' && this.state.isCompCreator;
           if (!hasPreferenceTab) {
             this.gotoPlayerGrading();
           }
@@ -550,30 +584,6 @@ class CompetitionOpenRegForm extends Component {
           nextButtonClicked: false,
           loading: false,
         });
-      }
-    }
-
-    if (nextProps.appState.yearList !== this.props.appState.yearList) {
-      let getDataLoading = this.state.getDataLoading ?? false;
-      if (this.props.appState.yearList.length > 0) {
-        let yearRefId = getGlobalYear()
-          ? JSON.parse(getGlobalYear())
-          : getCurrentYear(this.props.appState.yearList);
-        this.props.add_editcompetitionFeeDeatils(yearRefId, 'yearRefId');
-        this.setDetailsFieldValue();
-        setGlobalYear(yearRefId);
-        let competitionId = this.props.location.state ? this.props.location.state.id : null;
-        if (competitionId) {
-          this.props.getAllCompetitionFeesDeatilsAction(
-            competitionId,
-            null,
-            this.state.sourceModule,
-            null,
-            yearRefId,
-          );
-          getDataLoading = true;
-        }
-        this.setState({ yearRefId: yearRefId, getDataLoading });
       }
     }
   }
@@ -600,13 +610,13 @@ class CompetitionOpenRegForm extends Component {
   };
 
   getMembershipDetails = yearRefId => {
+    const { competitionDetailData } = this.props.competitionFeesState;
     let affiliateOrgId = this.props.location.state
       ? this.props.location.state.affiliateOrgId
       : null;
-    let competitionId = this.props.location.state ? this.props.location.state.id : null;
+    let competitionId = competitionDetailData.competitionUniqueKey;
     if (competitionId !== null) {
-      let hasRegistration =
-        this.props.competitionFeesState.competitionDetailData.hasRegistration ?? 0;
+      let hasRegistration = competitionDetailData.hasRegistration ?? 0;
       this.props.getAllCompetitionFeesDeatilsAction(
         competitionId,
         hasRegistration,
@@ -623,75 +633,14 @@ class CompetitionOpenRegForm extends Component {
     return isNewComp;
   };
 
-  ////disable or enable particular fields
-  setPermissionFields = (isPublished, isRegClosed, isCreatorEdit) => {
-    // let invitees = this.props.competitionFeesState.competitionDetailData.invitees
-    // let hasRegistration = this.props.competitionFeesState.competitionDetailData.hasRegistration
-    if (isPublished) {
-      if (isRegClosed) {
-        let permissionObject = {
-          compDetailDisable: false,
-          regInviteesDisable: true,
-          membershipDisable: true,
-          divisionsDisable: false, // Updated for Comp Division Handling
-          feesTableDisable: true,
-          paymentsDisable: true,
-          discountsDisable: true,
-          allDisable: false,
-          isPublished: true,
-        };
-        this.setState({ permissionState: permissionObject });
-        return;
-      }
-
-      if (isCreatorEdit) {
-        let permissionObject = {
-          compDetailDisable: true,
-          regInviteesDisable: true,
-          membershipDisable: true,
-          divisionsDisable: true, // Updated for Comp Division Handling
-          feesTableDisable: true,
-          paymentsDisable: true,
-          discountsDisable: true,
-          allDisable: true,
-          isPublished: true,
-        };
-        this.setState({ permissionState: permissionObject });
-      } else {
-        let permissionObject = {
-          compDetailDisable: false,
-          regInviteesDisable: true,
-          membershipDisable: true,
-          // divisionsDisable: hasRegistration == 1,
-          divisionsDisable: false, // Updated for Comp Division Handling
-          feesTableDisable: true,
-          paymentsDisable: false,
-          discountsDisable: true,
-          allDisable: false,
-          isPublished: true,
-        };
-        this.setState({ permissionState: permissionObject });
-      }
-    } else {
-      let permissionObject = {
-        compDetailDisable: false,
-        regInviteesDisable: false,
-        membershipDisable: false,
-        divisionsDisable: false,
-        feesTableDisable: false,
-        paymentsDisable: false,
-        discountsDisable: false,
-        allDisable: false,
-        isPublished: false,
-      };
-      this.setState({ permissionState: permissionObject });
-    }
-  };
-
   getReference() {
     let yearRefId = getGlobalYear();
     const isNewComp = this.checkIsNewComp();
-
+    const { key } = this.state;
+    const { participate_CompetitionArr, all_own_CompetitionArr, participate_YearArr, own_YearArr } =
+      this.props.appState;
+    const competitionArr = key === 'part' ? participate_CompetitionArr : all_own_CompetitionArr;
+    const yearArr = key === 'part' ? participate_YearArr : own_YearArr;
     if (isNewComp && yearRefId) {
       this.props.add_editcompetitionFeeDeatils(yearRefId, 'yearRefId');
       this.setDetailsFieldValue();
@@ -700,18 +649,11 @@ class CompetitionOpenRegForm extends Component {
       });
       return;
     }
-
-    let storedCompetitionId = null;
-    let storedCompetitionStatus = null;
-    storedCompetitionId = getOwn_competition();
-    storedCompetitionStatus = getOwn_competitionStatus();
+    let storedCompetitionId = get_competition(key);
+    let storedCompetitionStatus = get_competitionStatus(key);
     // let storedfinalTypeRefId = getOwn_CompetitionFinalRefId()
-    let propsData =
-      this.props.appState.own_YearArr.length > 0 ? this.props.appState.own_YearArr : undefined;
-    let compData =
-      this.props.appState.all_own_CompetitionArr.length > 0
-        ? this.props.appState.all_own_CompetitionArr
-        : undefined;
+    let propsData = yearArr.length > 0 ? yearArr : undefined;
+    let compData = competitionArr.length > 0 ? competitionArr : undefined;
     let fromReplicate = this.props.location.state ? this.props.location.state.fromReplicate : null;
 
     if (fromReplicate != 1) {
@@ -730,27 +672,12 @@ class CompetitionOpenRegForm extends Component {
           getDataLoading: true,
         });
       } else if (yearRefId) {
-        this.props.getYearAndCompetitionOwnAction(
-          this.props.appState.own_YearArr,
-          yearRefId,
-          'own_competition',
-        );
-        this.setState({
-          yearRefId: JSON.parse(yearRefId),
-        });
+        this.getYearAndCompetition(yearRefId);
       } else {
-        this.props.getYearAndCompetitionOwnAction(
-          this.props.appState.own_YearArr,
-          null,
-          'own_competition',
-        );
+        this.getYearAndCompetition(null);
       }
     } else {
-      this.props.getYearAndCompetitionOwnAction(
-        this.props.appState.own_YearArr,
-        yearRefId,
-        'own_competition',
-      );
+      this.getYearAndCompetition(yearRefId);
     }
   }
 
@@ -860,13 +787,17 @@ class CompetitionOpenRegForm extends Component {
   }
 
   saveAPIsActionCall = values => {
+    const { key } = this.state;
     let tabKey = this.state.competitionTabKey;
     let compFeesState = this.props.competitionFeesState;
     let competitionId = compFeesState.competitionId;
     let postData = compFeesState.competitionDetailData;
     let nonPlayingDate = JSON.stringify(postData.nonPlayingDates);
     let venue = JSON.stringify(compFeesState.postVenues);
-
+    const competitionArr =
+      key === 'part'
+        ? this.props.appState.participate_CompetitionArr
+        : this.props.appState.all_own_CompetitionArr;
     //invitees
     let invitees = [];
     let anyOrgAffiliateArr = [];
@@ -954,7 +885,7 @@ class CompetitionOpenRegForm extends Component {
           compFeesState.defaultCompFeesOrgLogoData.id,
           this.state.sourceModule,
         );
-        setOwn_CompetitionFinalRefId(postData.finalTypeRefId);
+        set_competitionFinalRefId(key, postData.finalTypeRefId);
         this.setState({ loading: true, divisionState: true });
       } else {
         if (invitees.length === 0) {
@@ -1003,7 +934,7 @@ class CompetitionOpenRegForm extends Component {
     } else if (tabKey == TabKey.Preferences) {
       this.preferenceRef.showSavePreferenceConfirm(result => {
         if (result) {
-          let competitionList = this.props.appState.own_CompetitionArr;
+          let competitionList = competitionArr;
           let compExist = competitionList.find(x => x.competitionId == this.state.firstTimeCompId);
           if (compExist) {
             compExist.allowTeamPreferences = result.allowTeamPreferences;
@@ -1055,7 +986,6 @@ class CompetitionOpenRegForm extends Component {
 
   headerView = () => {
     const isNewComp = this.checkIsNewComp();
-    let allDisable = this.state.permissionState.allDisable;
     return (
       <div className="header-view">
         <Header className="form-header-view d-flex bg-transparent align-items-center">
@@ -1072,13 +1002,13 @@ class CompetitionOpenRegForm extends Component {
                   {AppConstants.competitionDetails}
                 </Breadcrumb.Item>
               </Breadcrumb>
-              {allDisable ? null : (
+              {
                 <div className="mt-n20">
                   <CustomToolTip placement="top">
                     <span>{AppConstants.compDetailsMsg}</span>
                   </CustomToolTip>
                 </div>
-              )}
+              }
             </>
           )}
         </Header>
@@ -1112,29 +1042,29 @@ class CompetitionOpenRegForm extends Component {
 
   // year change and get competition lost
   onYearChange(yearId) {
+    const { key } = this.state;
+    const permissions = getCompetitionPermissions(); //disabling fields until new data is in
+    this.setState({ permissionState: permissions });
     setGlobalYear(yearId);
-    setOwn_competition(undefined);
-    setOwn_competitionStatus(undefined);
-    setOwn_CompetitionFinalRefId(undefined);
+    set_competition(key, undefined);
+    set_competitionStatus(key, undefined);
+    set_competitionFinalRefId(key, undefined);
     this.props.clearCompReducerDataAction('all');
-    this.props.getYearAndCompetitionOwnAction(
-      this.props.appState.own_YearArr,
-      yearId,
-      'own_competition',
-    );
+    this.getYearAndCompetition(yearId);
     // this.props.getCompetitionTypeListAction(yearRefId);
     this.setState({ firstTimeCompId: null, yearRefId: yearId, competitionStatus: 0 });
   }
 
   onCompetitionChange(competitionId, competitionArray) {
+    const { key } = this.state;
     let competititionIndex = competitionArray.findIndex(x => x.competitionId == competitionId);
     let competitionStatus = competitionArray[competititionIndex].competitionStatus;
     let statusRefId = competitionArray[competititionIndex].statusRefId;
     let finalTypeRefId = competitionArray[competititionIndex].finalTypeRefId;
     if (competitionStatus == 2) {
-      setOwn_competition(competitionId);
-      setOwn_competitionStatus(statusRefId);
-      setOwn_CompetitionFinalRefId(finalTypeRefId);
+      set_competition(key, competitionId);
+      set_competitionStatus(key, statusRefId);
+      set_competitionFinalRefId(key, finalTypeRefId);
     }
     this.props.clearCompReducerDataAction('all');
     this.props.getAllCompetitionFeesDeatilsAction(
@@ -1157,7 +1087,11 @@ class CompetitionOpenRegForm extends Component {
   }
 
   dropdownView = () => {
-    const { own_YearArr, all_own_CompetitionArr } = this.props.appState;
+    const { key } = this.state;
+    const { participate_CompetitionArr, all_own_CompetitionArr, participate_YearArr, own_YearArr } =
+      this.props.appState;
+    const competitionArr = key === 'part' ? participate_CompetitionArr : all_own_CompetitionArr;
+    const yearArr = key === 'part' ? participate_YearArr : own_YearArr;
     return (
       <div className="comp-venue-courts-dropdown-view mt-0">
         <div className="fluid-width">
@@ -1170,9 +1104,9 @@ class CompetitionOpenRegForm extends Component {
                   className="year-select reg-filter-select-year ml-2"
                   data-testid={AppUniqueId.COMPETITION_YEAR_SELECT_BOX}
                   onChange={yearRefId => this.onYearChange(yearRefId)}
-                  value={!!own_YearArr?.length ? this.state.yearRefId : ''}
+                  value={!!yearArr?.length ? this.state.yearRefId : ''}
                 >
-                  {own_YearArr.map(item => (
+                  {yearArr.map(item => (
                     <Option
                       key={'year_' + item.id}
                       value={item.id}
@@ -1197,11 +1131,11 @@ class CompetitionOpenRegForm extends Component {
                   className="year-select reg-filter-select-competition ml-2"
                   data-testid={AppUniqueId.COMPETITION_DROPDOWN}
                   onChange={competitionId =>
-                    this.onCompetitionChange(competitionId, all_own_CompetitionArr)
+                    this.onCompetitionChange(competitionId, competitionArr)
                   }
                   value={JSON.parse(JSON.stringify(this.state.firstTimeCompId))}
                 >
-                  {all_own_CompetitionArr.map(item => (
+                  {competitionArr.map(item => (
                     <Option
                       key={'competition_' + item.competitionId}
                       value={item.competitionId}
@@ -1315,8 +1249,7 @@ class CompetitionOpenRegForm extends Component {
   }
   // Non playing dates view
   nonPlayingDateView(item, index) {
-    let compDetailDisable = this.state.permissionState.compDetailDisable;
-    let disabledStatus = this.state.competitionStatus == 1;
+    const compDetailDisabled = !this.state.permissionState?.compDetails?.enabled;
     return (
       <div className="fluid-width mt-3">
         <div className="row">
@@ -1326,7 +1259,7 @@ class CompetitionOpenRegForm extends Component {
               placeholder={AppConstants.name}
               value={item.name}
               onChange={e => this.updateNonPlayingNames(e.target.value, index, 'name')}
-              disabled={disabledStatus || compDetailDisable}
+              disabled={compDetailDisabled}
             />
           </div>
           <div className="col-sm">
@@ -1338,12 +1271,12 @@ class CompetitionOpenRegForm extends Component {
               format="DD-MM-YYYY"
               showTime={false}
               value={item.nonPlayingDate && moment(item.nonPlayingDate, 'YYYY-MM-DD')}
-              disabled={disabledStatus || compDetailDisable}
+              disabled={compDetailDisabled}
             />
           </div>
           <div
             className="col-sm-2 transfer-image-view"
-            onClick={() => (!compDetailDisable ? this.removeNonPlaying(index) : null)}
+            onClick={() => (compDetailDisabled ? this.removeNonPlaying(index) : null)}
           >
             <a className="transfer-image-view">
               <span className="user-remove-btn">
@@ -1410,14 +1343,12 @@ class CompetitionOpenRegForm extends Component {
 
   setYearForNewComp = yearRefId => {
     this.props.add_editcompetitionFeeDeatils(yearRefId, 'yearRefId');
-    setGlobalYear(yearRefId);
     this.setDetailsFieldValue();
-    this.getMembershipDetails(yearRefId);
+    setGlobalYear(yearRefId);
     this.setState({ yearRefId: yearRefId });
   };
 
   selectYearForNewComp = () => {
-    const { compDetailDisable } = this.state.permissionState;
     const { yearList } = this.props.appState;
     const isNewComp = this.checkIsNewComp();
     let competitionId = this.props.competitionFeesState.competitionId;
@@ -1433,7 +1364,7 @@ class CompetitionOpenRegForm extends Component {
             className="year-select reg-filter-select-year"
             data-testid={AppUniqueId.SELECT_COMPETITION_YEAR}
             style={{ maxWidth: 80 }}
-            disabled={compDetailDisable}
+            disabled={!isNewComp}
             onChange={e => this.setYearForNewComp(e)}
           >
             {yearList.map(item => (
@@ -1453,14 +1384,15 @@ class CompetitionOpenRegForm extends Component {
 
   ///////form content view - fee details
   contentView = () => {
-    let roundsArray = this.props.competitionManagementState.fixtureTemplate;
+    const { isCompCreator } = this.state;
     let appState = this.props.appState;
     const { affiliateOurOrg } = this.props.userState;
     // const { venueList, mainVenueList } = this.props.commonReducerState
     let detailsData = this.props.competitionFeesState;
     let defaultCompFeesOrgLogo = detailsData.defaultCompFeesOrgLogo;
-    let compDetailDisable = this.state.permissionState.compDetailDisable;
-    let disabledStatus = this.state.competitionStatus == 1;
+    const compDetailDisabled = !this.state.permissionState?.compDetails?.enabled;
+    const playerPublishOptionsDisabled =
+      !this.state.permissionState?.compDetails?.playerPublishOptions?.enabled;
     return (
       <div className="content-view pt-4">
         {this.selectYearForNewComp()}
@@ -1480,7 +1412,7 @@ class CompetitionOpenRegForm extends Component {
                 'competitionName',
               )
             }
-            disabled={disabledStatus || compDetailDisable}
+            disabled={compDetailDisabled}
             onBlur={i =>
               this.formRef.current.setFieldsValue({
                 competition_name: captializedString(i.target.value),
@@ -1514,7 +1446,7 @@ class CompetitionOpenRegForm extends Component {
                 </label>
               </div>
               <input
-                disabled={disabledStatus || compDetailDisable}
+                disabled={compDetailDisabled}
                 type="file"
                 id="user-pic"
                 className="d-none"
@@ -1531,7 +1463,7 @@ class CompetitionOpenRegForm extends Component {
                   data-testid={AppUniqueId.USE_DEFAULT_COMP_LOGO}
                   checked={detailsData.competitionDetailData.logoIsDefault}
                   onChange={e => this.logoIsDefaultOnchange(e.target.checked, 'logoIsDefault')}
-                  disabled={disabledStatus || compDetailDisable}
+                  disabled={compDetailDisabled}
                 >
                   {AppConstants.useDefault}
                 </Checkbox>
@@ -1542,7 +1474,7 @@ class CompetitionOpenRegForm extends Component {
                   className="single-checkbox ml-0"
                   checked={this.state.logoSetDefault}
                   onChange={e => this.logoSaveAsDefaultOnchange(e.target.checked, 'logoIsDefault')}
-                  disabled={disabledStatus || compDetailDisable}
+                  disabled={compDetailDisabled}
                 >
                   {AppConstants.useAffiliateLogo}
                 </Checkbox>
@@ -1559,7 +1491,7 @@ class CompetitionOpenRegForm extends Component {
           allowClear
           value={detailsData.competitionDetailData.description}
           onChange={e => this.props.add_editcompetitionFeeDeatils(e.target.value, 'description')}
-          disabled={disabledStatus || compDetailDisable}
+          disabled={compDetailDisabled}
         />
 
         <div>
@@ -1582,7 +1514,7 @@ class CompetitionOpenRegForm extends Component {
               onSearch={value => {
                 this.handleSearch(value, appState.mainVenueList);
               }}
-              disabled={disabledStatus || compDetailDisable}
+              disabled={compDetailDisabled}
             >
               {appState.venueList.map(item => (
                 <Option
@@ -1596,10 +1528,8 @@ class CompetitionOpenRegForm extends Component {
             </Select>
           </Form.Item>
         </div>
-        {this.state.competitionStatus == 1 ||
-        affiliateOurOrg.organisationTypeRefId > affiliateOurOrg.whatIsTheLowestOrgThatCanAddVenue ||
-        disabledStatus ||
-        compDetailDisable ? null : (
+        {affiliateOurOrg.organisationTypeRefId >
+          affiliateOurOrg.whatIsTheLowestOrgThatCanAddVenue || compDetailDisabled ? null : (
           <NavLink
             to={{
               pathname: `/competitionVenueAndTimesAdd`,
@@ -1625,7 +1555,7 @@ class CompetitionOpenRegForm extends Component {
               this.props.add_editcompetitionFeeDeatils(e.target.value, 'competitionTypeRefId')
             }
             value={detailsData.competitionTypeRefId}
-            disabled={disabledStatus || compDetailDisable}
+            disabled={compDetailDisabled}
           >
             {appState.typesOfCompetition.map(item => (
               <Radio
@@ -1652,7 +1582,7 @@ class CompetitionOpenRegForm extends Component {
               this.props.add_editcompetitionFeeDeatils(e.target.value, 'competitionFormatRefId')
             }
             value={detailsData.competitionFormatRefId}
-            disabled={disabledStatus || compDetailDisable}
+            disabled={compDetailDisabled}
           >
             {appState.competitionFormatTypes.map(item => (
               <div className="contextualHelp-RowDirection" key={item.id}>
@@ -1683,7 +1613,7 @@ class CompetitionOpenRegForm extends Component {
             className="reg-competition-radio"
             onChange={e => this.setGradesAndPools(e.target.value)}
             value={detailsData.competitionDetailData.finalTypeRefId}
-            disabled={disabledStatus || compDetailDisable}
+            disabled={compDetailDisabled}
           >
             <Radio data-testid={AppUniqueId.GRADES} value={1}>
               {AppConstants.grades}
@@ -1709,7 +1639,7 @@ class CompetitionOpenRegForm extends Component {
                   format="DD-MM-YYYY"
                   placeholder="dd-mm-yyyy"
                   showTime={false}
-                  disabled={disabledStatus || compDetailDisable}
+                  disabled={compDetailDisabled}
                 />
               </Form.Item>
             </div>
@@ -1728,7 +1658,7 @@ class CompetitionOpenRegForm extends Component {
                   placeholder="dd-mm-yyyy"
                   showTime={false}
                   disabledDate={d => !d || d.isBefore(detailsData.competitionDetailData.startDate)}
-                  disabled={disabledStatus || compDetailDisable}
+                  disabled={compDetailDisabled}
                 />
               </Form.Item>
             </div>
@@ -1755,7 +1685,7 @@ class CompetitionOpenRegForm extends Component {
                 onChange={e =>
                   this.props.add_editcompetitionFeeDeatils(e.target.value, 'roundInDays')
                 }
-                disabled={disabledStatus || compDetailDisable}
+                disabled={compDetailDisabled}
                 heading={AppConstants._days}
                 required={'pt-0'}
               />
@@ -1768,7 +1698,7 @@ class CompetitionOpenRegForm extends Component {
                 onChange={e =>
                   this.props.add_editcompetitionFeeDeatils(e.target.value, 'roundInHours')
                 }
-                disabled={disabledStatus || compDetailDisable}
+                disabled={compDetailDisabled}
                 heading={AppConstants._hours}
                 required={'pt-0'}
               />
@@ -1781,7 +1711,7 @@ class CompetitionOpenRegForm extends Component {
                 onChange={e =>
                   this.props.add_editcompetitionFeeDeatils(e.target.value, 'roundInMins')
                 }
-                disabled={disabledStatus || compDetailDisable}
+                disabled={compDetailDisabled}
                 heading={AppConstants._minutes}
                 required={'pt-0'}
               />
@@ -1794,10 +1724,10 @@ class CompetitionOpenRegForm extends Component {
             detailsData.competitionDetailData.nonPlayingDates.map((item, index) =>
               this.nonPlayingDateView(item, index),
             )}
-          {disabledStatus || compDetailDisable ? null : (
+          {compDetailDisabled ? null : (
             <a>
               <span
-                onClick={() => (!compDetailDisable ? this.addNonPlayingDate() : null)}
+                onClick={() => (compDetailDisabled ? this.addNonPlayingDate() : null)}
                 className="input-heading-add-another"
               >
                 + {AppConstants.addAnotherNonPlayingDate}
@@ -1819,7 +1749,7 @@ class CompetitionOpenRegForm extends Component {
                     : detailsData.competitionDetailData.maximumPlayers
                 }
                 onChange={e => this.updateMaximumPlayers(e.target.value)}
-                disabled={disabledStatus || compDetailDisable}
+                disabled={compDetailDisabled}
                 name="maximumPlayers"
               />
             </div>
@@ -1837,7 +1767,7 @@ class CompetitionOpenRegForm extends Component {
               initialValue={detailsData.competitionDetailData.allowPlayerReplication}
             >
               <Radio.Group
-                disabled={disabledStatus || compDetailDisable}
+                disabled={compDetailDisabled}
                 className="reg-competition-radio"
                 onChange={e =>
                   this.props.add_editcompetitionFeeDeatils(e.target.value, 'allowPlayerReplication')
@@ -1853,7 +1783,7 @@ class CompetitionOpenRegForm extends Component {
         <div>
           <InputWithHead heading={AppConstants.playerPublishLabel} />
           <Radio.Group
-            disabled={compDetailDisable}
+            disabled={playerPublishOptionsDisabled}
             onChange={e =>
               this.props.add_editcompetitionFeeDeatils(e.target.value, 'playerPublishTypeRefId')
             }
@@ -1930,8 +1860,7 @@ class CompetitionOpenRegForm extends Component {
   divisionsView = () => {
     let divisionData = this.props.competitionFeesState.competitionDivisionsData;
     let divisionArray = divisionData !== null ? divisionData : [];
-    let divisionsDisable = this.state.permissionState.divisionsDisable;
-    // let disabledStatus = this.state.competitionStatus == 1
+    const divisionsDisabled = !this.state.permissionState?.division?.enabled;
     let roundsData = [];
     if (this.props.drawsState.getDrawsRoundsData) {
       roundsData = this.props.drawsState.getDrawsRoundsData.slice(1);
@@ -1962,15 +1891,13 @@ class CompetitionOpenRegForm extends Component {
                       rowKey="competitionDivisionId"
                     />
                   </div>
-                  {divisionsDisable ? null : (
+                  {divisionsDisabled ? null : (
                     <a>
                       <span
                         id={AppUniqueId.add_div_button}
                         className="input-heading-add-another"
                         data-testid={AppUniqueId.ADD_REGISTRATION_DIVISIONS}
-                        onClick={() =>
-                          !divisionsDisable ? this.addRemoveDivision(index, item, 'add') : null
-                        }
+                        onClick={() => this.addRemoveDivision(index, item, 'add')}
                       >
                         + {AppConstants.addDivision}
                       </span>
@@ -1989,7 +1916,7 @@ class CompetitionOpenRegForm extends Component {
         <div className="contextualHelp-RowDirection mt-5">
           <span className="form-heading">{AppConstants.gradesOrPools}</span>
         </div>
-        <GradePoolNames />
+        <GradePoolNames disabled={!this.state.permissionState?.division?.enabled} />
 
         <Modal
           className="add-membership-type-modal"
@@ -2094,9 +2021,9 @@ class CompetitionOpenRegForm extends Component {
   //////footer view containing all the buttons like submit and cancel
   footerView = () => {
     const isNewComp = this.checkIsNewComp();
+    const { isCompCreator } = this.state;
     let tabKey = this.state.competitionTabKey;
     let isPublished = this.state.permissionState.isPublished;
-    let allDisable = this.state.permissionState.allDisable;
     let drawsPublished = this.state.competitionStatus == 1;
     let hasRegistration = this.props.competitionFeesState.competitionDetailData.hasRegistration;
     let isPublishButton = tabKey === TabKey.Divisions && !this.state.isPublished;
@@ -2105,7 +2032,7 @@ class CompetitionOpenRegForm extends Component {
     let shouldPublishInRegistation = isPublishButton && hasRegistration;
     let buttonPressed = isPublishButton ? 'publish' : isSaveButton ? 'save' : 'next';
     let competitionId = this.props.competitionFeesState.competitionId;
-    return (
+    return (!competitionId && !isNewComp) || !isCompCreator ? null : (
       <div className="fluid-width">
         <div className="footer-view">
           <div className="row">
@@ -2213,7 +2140,7 @@ class CompetitionOpenRegForm extends Component {
                     className="h-100"
                     onMouseEnter={() =>
                       this.setState({
-                        tooltipVisiblePublish: allDisable || shouldPublishInRegistation,
+                        tooltipVisiblePublish: shouldPublishInRegistation,
                       })
                     }
                     onMouseLeave={() => this.setState({ tooltipVisiblePublish: false })}
@@ -2229,7 +2156,7 @@ class CompetitionOpenRegForm extends Component {
                       className="publish-button save-draft-text"
                       data-testid={AppUniqueId.NEXT_BUTTON}
                       type="primary"
-                      disabled={drawsPublished || shouldPublishInRegistation ? true : allDisable}
+                      disabled={drawsPublished || shouldPublishInRegistation}
                       htmlType="submit"
                       onClick={() =>
                         this.setState({
@@ -2246,7 +2173,7 @@ class CompetitionOpenRegForm extends Component {
                         : AppConstants.next}
                     </Button>
                   </Tooltip>
-                  {tabKey == TabKey.Divisions && !isNewComp && !allDisable && (
+                  {tabKey == TabKey.Divisions && !isNewComp && (
                     <Button
                       onClick={() =>
                         this.setState({
@@ -2257,7 +2184,7 @@ class CompetitionOpenRegForm extends Component {
                       htmlType="submit"
                       className="publish-button"
                       type="primary"
-                      disabled={drawsPublished || shouldPublishInRegistation ? true : allDisable}
+                      disabled={drawsPublished || shouldPublishInRegistation}
                     >
                       {AppConstants.next}
                     </Button>
@@ -2295,15 +2222,14 @@ class CompetitionOpenRegForm extends Component {
     const regInviteesViewProps = {
       organisationTypeRefId: JSON.stringify(this.state.organisationTypeRefId),
       yearRefId: this.state.yearRefId,
-      regInviteesDisable: this.state.permissionState.regInviteesDisable,
-      isAffiliateEdit: this.state.isCreatorEdit,
+      regInviteesDisable: !this.state.permissionState?.compDetails?.invitees?.enabled,
+      isCompCreator: this.state.isCompCreator,
     };
     let competitionId = null;
     competitionId = this.props.location.state ? this.props.location.state.id : null;
     const key = this.props.location.state ? this.props.location.state.key : null;
     let hasRegistration = this.props.competitionFeesState?.competitionDetailData?.hasRegistration;
     let showNavigateView = !this.state.isRegClosed && hasRegistration == 1;
-    let allDisable = this.state.permissionState.allDisable;
     return (
       <div className="fluid-width default-bg">
         <DashboardLayout
@@ -2333,25 +2259,23 @@ class CompetitionOpenRegForm extends Component {
             {isNewComp || !showNavigateView
               ? null
               : this.regCompetitionFeeNavigationView(competitionId)}
-            {isNewComp || competitionId ? null : this.dropdownView()}
+            {isNewComp || !competitionId ? null : this.dropdownView()}
 
             <Content>
               <div className="tab-view">
                 <Tabs activeKey={this.state.competitionTabKey} onChange={this.tabCallBack}>
                   <TabPane tab={AppConstants.details} key={TabKey.Details}>
                     <div className="tab-formView mt-5">{this.contentView()}</div>
-                    {allDisable ? null : (
+                    {
                       <div className="tab-formView mt-5">
                         <RegInviteesView {...regInviteesViewProps} />
                       </div>
-                    )}
+                    }
                   </TabPane>
                   <TabPane tab={AppConstants.divisions} key={TabKey.Divisions}>
                     <div className="tab-formView">{this.divisionsView()}</div>
                   </TabPane>
-                  {process.env.REACT_APP_TEAM_PREFERENCES_FOR_DRAW === 'true' &&
-                  !isNewComp &&
-                  !allDisable ? (
+                  {process.env.REACT_APP_TEAM_PREFERENCES_FOR_DRAW === 'true' && !isNewComp ? (
                     <TabPane tab={AppConstants.preferences} key={TabKey.Preferences}>
                       <div className="tab-formView">
                         <PreferenceTab
@@ -2360,6 +2284,7 @@ class CompetitionOpenRegForm extends Component {
                           competitionId={this.state.firstTimeCompId}
                           onRef={this.onPreferenceRef}
                           formRef={this.formRef}
+                          disabled={!this.state.permissionState?.preference?.enabled}
                         />
                       </div>
                     </TabPane>
@@ -2408,6 +2333,7 @@ function mapDispatchToProps(dispatch) {
       clearCompReducerDataAction,
       getDefaultCompFeesLogoAction,
       getYearAndCompetitionOwnAction, //own_YearArr
+      getYearAndCompetitionParticipateAction,
       searchVenueList,
       venueListAction,
       clearFilter,

@@ -305,6 +305,19 @@ const initialState = {
 
 let uniqueRegLinkOrgId = 0;
 
+//get User Role
+function getIsUmpireUserRole(userRoleData) {
+  let isUmpireRole = false;
+
+  for (let i in userRoleData) {
+    if (userRoleData[i].roleId == 15 || userRoleData[i].roleId == 20) {
+      isUmpireRole = true;
+      break;
+    }
+  }
+  return isUmpireRole;
+}
+
 function getUpdatedTeamMemberObj(state, competition) {
   try {
     const teamMemberTemp = deepCopyFunction(teamMemberObj);
@@ -1435,7 +1448,9 @@ function userReducer(state = initialState, action) {
       return { ...state };
 
     case ApiConstants.API_GET_USER_ROLE_SUCCESS:
+      let isUmpireRole = getIsUmpireUserRole(action.result);
       let userRole = getUserRole(action.result);
+      state.isUmpireRole = isUmpireRole;
       state.userRole = userRole;
       return {
         ...state,

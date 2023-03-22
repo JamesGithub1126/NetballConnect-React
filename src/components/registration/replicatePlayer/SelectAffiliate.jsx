@@ -9,7 +9,6 @@ const SelectAffiliate = React.memo(({ affiliates, renderItem, ...props }) => {
       <Span>{AppConstants.affiliate}</Span>
       <Select
         showSearch
-        placeholder="Please Select an Affiliate"
         optionFilterProp="children"
         filterOption={(input, option) =>
           (option?.label ?? '').toLowerCase().includes(input.toLowerCase())

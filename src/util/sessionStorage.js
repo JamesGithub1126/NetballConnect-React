@@ -2,7 +2,7 @@ import { isNotNullAndUndefined } from './helpers';
 import AppConstants from 'themes/appConstants';
 import { FLAVOUR, RECORDUMPIRETYPE } from 'util/enums';
 import { isNetball } from 'components/liveScore/liveScoreSettings/liveScoreSettingsUtils';
-import {getUmpireSequencesFromSettings} from "./umpireHelper";
+import { getUmpireSequencesFromSettings } from './umpireHelper';
 
 // set competition id
 const setCompetitionID = competitionId => {
@@ -203,6 +203,7 @@ const clearUmpireStorage = () => {
     'Participate_year',
     'own_year',
     'own_FinalRefId',
+    'Participating_FinalRefId',
     'global_year',
   ];
   for (let key of keysToRemove) {
@@ -215,6 +216,7 @@ const clearCompetitionLocalStorage = () => {
     'own_competition',
     'Participating_competition',
     'own_FinalRefId',
+    'Participating_FinalRefId',
     'Participating_competitionStatus',
     'own_competitionStatus',
     'Participating_competitionStaus',
@@ -264,6 +266,13 @@ const setOwn_CompetitionFinalRefId = own_FinalRefId => {
   localStorage.setItem('own_FinalRefId', own_FinalRefId);
 };
 
+const getParticipating_CompetitionFinalRefId = () => {
+  return localStorage.Participating_FinalRefId;
+};
+const setParticipating_CompetitionFinalRefId = Participating_FinalRefId => {
+  localStorage.setItem('Participating_FinalRefId', Participating_FinalRefId);
+};
+
 const clearCompetitionStorage = () => {
   let keysToRemove = [
     'own_competition',
@@ -271,6 +280,7 @@ const clearCompetitionStorage = () => {
     'Participate_year',
     'own_year',
     'own_FinalRefId',
+    'Participating_FinalRefId',
     'Participating_competitionStatus',
     'own_competitionStatus',
     'global_year',
@@ -378,7 +388,7 @@ const getRecordUmpireType = () => {
     competition && (recordUmpireType = competition.recordUmpireType);
   }
   return recordUmpireType;
-}
+};
 
 //temporary workaround, remove after converting everything to LiveScoreCompetition
 const setCompDataForAll = competition => {
@@ -398,9 +408,64 @@ const setCompDataForAll = competition => {
   }
 };
 
+const set_competition = (key, competition) => {
+  if (key === 'part') {
+    setParticipating_competition(competition);
+  } else {
+    setOwn_competition(competition);
+  }
+};
+const get_competition = key => {
+  if (key === 'part') {
+    getParticipating_competition();
+  } else {
+    getOwn_competition();
+  }
+};
+
+const get_competitionStatus = key => {
+  if (key === 'part') {
+    getParticipating_competitionStatus();
+  } else {
+    getOwn_competitionStatus();
+  }
+};
+
+const set_competitionStatus = (key, competitionStatus) => {
+  if (key === 'part') {
+    setParticipating_competitionStatus(competitionStatus);
+  } else {
+    setOwn_competitionStatus(competitionStatus);
+  }
+};
+
+const get_competitionFinalRefId = key => {
+  if (key === 'part') {
+    getParticipating_CompetitionFinalRefId();
+  } else {
+    getOwn_CompetitionFinalRefId();
+  }
+};
+
+const set_competitionFinalRefId = (key, finalRefId) => {
+  if (key === 'part') {
+    setParticipating_CompetitionFinalRefId(finalRefId);
+  } else {
+    setOwn_CompetitionFinalRefId(finalRefId);
+  }
+};
+
 export {
+  set_competition,
+  get_competition,
+  get_competitionStatus,
+  set_competitionStatus,
+  get_competitionFinalRefId,
+  set_competitionFinalRefId,
   getOwn_CompetitionFinalRefId,
   setOwn_CompetitionFinalRefId,
+  getParticipating_CompetitionFinalRefId,
+  setParticipating_CompetitionFinalRefId,
   setCompetitionID,
   getCompetitionId,
   setAuthToken,

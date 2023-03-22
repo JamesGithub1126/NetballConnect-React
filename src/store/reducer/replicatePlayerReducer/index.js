@@ -114,13 +114,30 @@ const ReplicatePlayerState = (state = initialState, action) => {
       return { ...state, onLoad: true };
     }
 
-    case ApiConstants.API_REPLICATE_PLAYER_SUBMIT_SUCCESS:
+    case ApiConstants.API_REPLICATE_PLAYER_SUBMIT_SUCCESS: {
+      return {
+        ...state,
+        onLoad: false,
+        modalVisible: action.payload ? action.payload : false,
+      };
+    }
+    
     case ApiConstants.API_REPLICATE_PLAYER_SUBMIT_ERROR: {
       return {
         ...state,
-        divisions: action.result ? action.result : [],
         onLoad: false,
-        modalVisible: action.payload ? action.payload : false,
+      };
+    }
+
+    case ApiConstants.API_REPLICATE_PLAYER_RESET_SELECTIONS: {
+      return {
+        ...state,
+        selections: {
+          competitionUniqueKey: [],
+          organisationUniqueKey: null,
+          roleId: null,
+          divisionId: null,
+        },
       };
     }
 
@@ -132,7 +149,7 @@ const ReplicatePlayerState = (state = initialState, action) => {
         divisions: [],
         selections: {
           ...state.selections,
-          competitionUniqueKey: null,
+          competitionUniqueKey: [],
           organisationUniqueKey: null,
           divisionId: null,
         },
