@@ -622,6 +622,7 @@ class MultiFieldDrawsFullCourt extends Component {
                           className="draw-date-text"
                           key={'court' + index}
                           style={{ width: width }}
+                          title={courtData.venueShortName + '-' + courtData.venueCourtName}
                         >
                           {courtData.venueShortName + '-' + courtData.venueCourtNumber}
                         </div>
@@ -690,7 +691,10 @@ class MultiFieldDrawsFullCourt extends Component {
                     <div style={{ height: rowHeight, width: firstColumnWidth }}>
                       <div className="sr-no" style={{ height: 63 }}>
                         <div className="venueCourt-text-div">
-                          <span className="venueCourt-text">
+                          <span
+                            className="venueCourt-text"
+                            title={courtData.venueShortName + '-' + courtData.venueCourtName}
+                          >
                             {courtData.venueShortName + '-' + courtData.venueCourtNumber}
                           </span>
                         </div>

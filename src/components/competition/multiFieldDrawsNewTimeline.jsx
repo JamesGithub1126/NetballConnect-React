@@ -2500,7 +2500,10 @@ class MultifieldDrawsNewTimeline extends Component {
                     {courtData.isExpanded ? '-' : '+'}
                   </span>
                 )}
-                <span className="draws-x-head-text">
+                <span
+                  className="draws-x-head-text"
+                  title={courtData.venueShortName + '-' + courtData.venueCourtName}
+                >
                   {courtData.venueShortName + '-' + courtData.venueCourtNumber}
                 </span>
               </div>

@@ -1960,8 +1960,6 @@ const AppConstants = {
   moveCompButtonPopoverMessageFA: 'Please select one or more registrations and click this button.',
   externalRegistrationMoveDisabled:
     'Your Member Federation has disabled the ability to move Football Australia Registrations.',
-  moveMessageSuccess: 'Sucessfully moved registrations.',
-  replicateMessageSuccess: 'Sucessfully replicated players.',
   userRoles: [
     {
       role: 'Player',

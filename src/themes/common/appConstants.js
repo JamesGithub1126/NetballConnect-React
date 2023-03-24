@@ -6,6 +6,7 @@ import { FLAVOUR } from '../../util/enums';
 const isFootball = process.env.REACT_APP_FLAVOUR === FLAVOUR.Football;
 
 const AppConstants = {
+  checking: 'Checking...',
   assignor: 'Assignor',
   assignorOrganisation: 'Assignor Organisation',
   deprecated: '---',
@@ -3051,6 +3052,8 @@ const AppConstants = {
   asPerCompetitionText: 'As Per Competition',
   matchOfficialSettingsText: 'Match Official Settings',
   numberOfMatchOfficialSettingsText: 'Number of Match Officials to be Allocated',
+  moveMessageSuccess: 'Sucessfully moved registrations.',
+  replicateMessageSuccess: 'Sucessfully replicated players.',
   oneWord: 'One',
   twoWord: 'Two',
   threeWord: 'Three',

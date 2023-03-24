@@ -115,7 +115,7 @@ const divisionTableColumns = [
               onChange={e =>
                 this_Obj.divisionTableDataOnchange(e.target.value, record, index, 'divisionName')
               }
-              onBlur={() => this_Obj.checkDivisionName(record)}
+              onBlur={() => this_Obj.checkDivisionName(index, record)}
               disabled={!this_Obj.state.permissionState?.division?.enabled}
             />
           </div>
@@ -342,6 +342,12 @@ class CompetitionOpenRegForm extends Component {
         view: false,
         message: '',
       },
+      selectedDivision: {
+        divisionName: '',
+        record: {},
+        index: '',
+      },
+      IsCompleteAddDivision: true,
     };
     this_Obj = this;
     this.props.clearCompReducerDataAction('all');
@@ -955,16 +961,28 @@ class CompetitionOpenRegForm extends Component {
     this.setState({ divisionState: true });
   }
 
-  async checkDivisionName(record) {
-    this.setState({ divisionChecking: true });
-    const result = await callCheckDivisionName(this.state.firstTimeCompId, record.divisionName);
-    if (result && result.length > 0) {
-      this.setState({
-        validateCompetitionDivisionlVisible: true,
-        deletedDivisionName: record.divisionName,
-      });
+  async checkDivisionName(index, record) {
+    if (record.divisionName == '') {
+      this.setState({ IsCompleteAddDivision: false });
+    } else {
+      this.setState({ divisionChecking: true });
+      const result = await callCheckDivisionName(this.state.firstTimeCompId, record.divisionName);
+      if (result && result.length > 0) {
+        this.setState({ IsCompleteAddDivision: false });
+        this.setState({
+          validateCompetitionDivisionlVisible: true,
+          deletedDivisionName: record.divisionName,
+          selectedDivision: {
+            divisionName: record.divisionName,
+            record: record,
+            index: index,
+          },
+        });
+      } else {
+        this.setState({ IsCompleteAddDivision: true });
+      }
+      this.setState({ divisionChecking: false });
     }
-    this.setState({ divisionChecking: false });
   }
 
   handleValidateDivision = key => {
@@ -973,8 +991,10 @@ class CompetitionOpenRegForm extends Component {
         this.state.firstTimeCompId,
         this.state.deletedDivisionName,
       );
+      this.setState({ IsCompleteAddDivision: true });
+    } else {
+      this.setState({ IsCompleteAddDivision: false });
     }
-
     this.setState({ validateCompetitionDivisionlVisible: false });
   };
 
@@ -1806,6 +1826,9 @@ class CompetitionOpenRegForm extends Component {
     if (this.state.competitionStatus == 1) {
     } else {
       if (keyword === 'add') {
+        this.setState({
+          IsCompleteAddDivision: false,
+        });
         this.props.addRemoveDivisionAction(index, item, keyword);
       } else if (item.competitionDivisionId != 0) {
         this.setState({
@@ -1816,6 +1839,9 @@ class CompetitionOpenRegForm extends Component {
       } else {
         this.props.addRemoveDivisionAction(index, this.state.competitionDivision, 'removeDivision');
         this.setDivisionFormFields();
+        this.setState({
+          IsCompleteAddDivision: true,
+        });
       }
     }
   };
@@ -1897,9 +1923,14 @@ class CompetitionOpenRegForm extends Component {
                         id={AppUniqueId.add_div_button}
                         className="input-heading-add-another"
                         data-testid={AppUniqueId.ADD_REGISTRATION_DIVISIONS}
-                        onClick={() => this.addRemoveDivision(index, item, 'add')}
+                        onClick={() => {
+                          if (this.state.IsCompleteAddDivision)
+                            this.addRemoveDivision(index, item, 'add');
+                        }}
                       >
-                        + {AppConstants.addDivision}
+                        {this.state.IsCompleteAddDivision
+                          ? '+ ' + AppConstants.addDivision
+                          : AppConstants.checking}
                       </span>
                     </a>
                   )}
@@ -1984,7 +2015,15 @@ class CompetitionOpenRegForm extends Component {
           title={AppConstants.validateCompetitionDivision}
           visible={this.state.validateCompetitionDivisionlVisible}
           onOk={() => this.handleValidateDivision('ok')}
-          onCancel={() => this.handleValidateDivision('cancel')}
+          onCancel={() => {
+            this_Obj.divisionTableDataOnchange(
+              '',
+              this.state.selectedDivision.record,
+              this.state.selectedDivision.index,
+              'divisionName',
+            );
+            this.handleValidateDivision('cancel');
+          }}
           okText={AppConstants.yes}
           cancelText={AppConstants.no}
         >
@@ -2184,7 +2223,11 @@ class CompetitionOpenRegForm extends Component {
                       htmlType="submit"
                       className="publish-button"
                       type="primary"
-                      disabled={drawsPublished || shouldPublishInRegistation}
+                      disabled={
+                        drawsPublished ||
+                        shouldPublishInRegistation ||
+                        !this.state.IsCompleteAddDivision
+                      }
                     >
                       {AppConstants.next}
                     </Button>

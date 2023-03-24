@@ -623,7 +623,7 @@ export function* replicatePlayerGetCompetitionsSaga(action) {
     if (result.status === 1) {
       yield put({
         type: ApiConstants.API_REPLICATE_PLAYER_GET_COMPETITION_LIST_SUCCESS,
-        result: result.result.data.result,
+        result: result.result.data,
         status: result.status,
       });
     } else {

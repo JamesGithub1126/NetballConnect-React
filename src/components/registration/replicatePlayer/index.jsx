@@ -20,6 +20,7 @@ const ReplicatePlayerModal = ({ selectedPlayers, onChancel }) => {
     const registrationIds = selectedPlayers.map(i => ({
       userId: i.userId,
       registrationId: i.registrationId,
+      compParticipantId: i.regCompParticipantId,
     }));
     const payload = {
       ...selections,

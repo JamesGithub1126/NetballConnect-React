@@ -1452,7 +1452,7 @@ const LiveScoreAxiosApi = {
     let url = '';
     if (!isCompParent) {
       //  url = `/users/umpire?competitionId=${id}&isUmpire=${isUmpire}&isUmpireCoach=${isUmpireCoach}`;
-      url = `/users/umpire?entityTypeId=${6}&entityId=${comp_Org_Id}&isUmpire=${isUmpire}&isUmpireCoach=${isUmpireCoach}&competitionId=${id}`;
+      url = `/users/umpire?entityTypeId=${6}&entityId=${comp_Org_Id}&isUmpire=${isUmpire}&isUmpireCoach=${isUmpireCoach}&competitionId=${id}&hasOtherRoles=${isOtherOfficial}`;
     } else {
       url = `/users/umpire?entityTypeId=${1}&entityId=${id}&isUmpire=${isUmpire}&isUmpireCoach=${isUmpireCoach}&hasOtherRoles=${isOtherOfficial}`;
     }

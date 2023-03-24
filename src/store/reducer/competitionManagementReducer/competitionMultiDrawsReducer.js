@@ -25,6 +25,7 @@ import {
   showOnlySelectedOrganisations,
 } from '../../../util/drawUtil';
 import { DrawShowOnlyType } from 'util/enums';
+import { isFootball } from 'util/registrationHelper';
 const initialState = {
   changeStatus: false,
   onLoad: false,
@@ -659,7 +660,7 @@ function structureDrawsData(data, key, venuesData, hasSubCourtDivision) {
         const isCourtNotEmpty = data.some(dataSlot => dataSlot.venueCourtId === court.courtId);
         if (!isCourtNotEmpty) {
           mainCourtNumberArray.push({
-            venueCourtNumber: court.courtName,
+            venueCourtNumber: court.courtNumber,
             venueCourtName: `${court.courtName}`,
             venueShortName: venue.shortName,
             venueNameCourtName: venue.shortName.toString() + court.courtName.toString(),
@@ -1103,6 +1104,9 @@ function CompetitionMultiDraws(state = initialState, action) {
         let isCompByRound = action.competitionId === '-1' || action.dateRangeCheck ? false : true;
         if (!isCompByRound) {
           const allCompetiitonDraws = action.result;
+          if (isFootball) {
+            hasSubCourtDivision = true;
+          }
           resultData = allcompetitionDrawsData(allCompetiitonDraws, hasSubCourtDivision);
           state.drawDivisions = resultData.data.legendsArray;
         } else {

@@ -332,7 +332,10 @@ class MultiFieldDrawsFullCourtTimeline extends Component {
                         height: 48,
                       }}
                     >
-                      <span className="venueCourt-text">
+                      <span
+                        className="venueCourt-text"
+                        title={courtData.venueShortName + '-' + courtData.venueCourtName}
+                      >
                         {courtData.venueShortName + '-' + courtData.venueCourtNumber}
                       </span>
                     </div>

@@ -906,7 +906,7 @@ const AxiosApi = {
     return Method.dataPost(url, token, payload);
   },
   async getReplicatePlayerCompetitions(payload) {
-    const url = '/api/externalRegistration/competitions';
+    const url = '/api/registration/replicate/competitions';
     return Method.dataPost(url, token, payload);
   },
   async getReplicatePlayerAffiliates(payload) {
